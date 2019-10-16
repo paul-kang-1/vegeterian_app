@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text ,Button,TouchableOpacity,Image} from 'react-native';
+import { View, Text, Button, TouchableOpacity, Image } from 'react-native';
 import { createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 import MemberScreen from './screen_member/member.js'; // 사용 할려면 매번 import 해와야함 
@@ -13,22 +13,22 @@ class HomeScreen extends React.Component {
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <Text>Home Screen1</Text>
         <Button
-         title={"to reco"}
-         onPress={()=> this.props.navigation.navigate('Recommend')}
-         />
+          title={"to reco"}
+          onPress={() => this.props.navigation.navigate('Recommend')}
+        />
 
-         <Button
-         title={"to member"}
-         onPress={()=> this.props.navigation.navigate('member')} //  버튼 on press 는 누가봐도 알겠고 ㅋㅋ navigation 이 이제 화면간 이동 할때 쓰는건데   this 는 이함수를 가르치는거고 , prop 은 자식 , 잘 모르겠으면 자세한건 만나서 설명해드림
-         /> 
-         <TouchableOpacity> 
-          
-           <Image 
+        <Button
+          title={"to member"}
+          onPress={() => this.props.navigation.navigate('member')} //  버튼 on press 는 누가봐도 알겠고 ㅋㅋ navigation 이 이제 화면간 이동 할때 쓰는건데   this 는 이함수를 가르치는거고 , prop 은 자식 , 잘 모르겠으면 자세한건 만나서 설명해드림
+        />
+        <TouchableOpacity>
+
+          <Image
             source={require("./assets/plate.png")} //TouchableOpacity  가 이제 버튼인데 안에 컴포넌트로 이미지를 넣으면 내가 원하는 모양의 버튼을 만들수 있는 컴포넌트 이미지 사용법은 이거 처럼  require("./as/as") 이러던가  source={{uri:"www.naver.com"}}
-           ></Image>
-           </TouchableOpacity>
-         
-         
+          ></Image>
+        </TouchableOpacity>
+
+
       </View>
     );
   }
