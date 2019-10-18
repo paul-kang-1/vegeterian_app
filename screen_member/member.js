@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import firebase, { storage } from "../firebase"; //firebase 는 로드를 한거고  firebase.js 에 설정을 해놓았습니다 
+import *  as Font from'expo-font'
 
 class MemberScreen extends React.Component {
 

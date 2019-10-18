@@ -4,10 +4,29 @@ import { createAppContainer } from 'react-navigation';
 import { createStackNavigator } from 'react-navigation-stack';
 import MemberScreen from './screen_member/member.js'; // 사용 할려면 매번 import 해와야함 
 import RecoScreen from './screen_reco/reco.js';
-
+import *  as Font from'expo-font' // 이것도 yarn add 해서 다운 받은거 입니다 
 
 
 class HomeScreen extends React.Component {
+
+
+
+  componentWillMount() {   // willmount 랑 didmount 의 차이가 있는데 굳이 이해는 안해도 되지만 그냥 render 하기 전에 먼저  실행되는 함수와 그 후에 실행되는 함수라고 알고있음 됩니다 
+    this.loadFonts();
+  }
+  async loadFonts() {
+    await Expo.Font.loadAsync({
+
+
+      'example2-font': require('./assets/fonts/BebasNeue-Regular.ttf'),
+      'example-font': require('./assets/fonts/Bayon.ttf'),  // 폰트 끌어오기 
+      
+
+    });
+  }
+
+
+
   render() {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -27,6 +46,8 @@ class HomeScreen extends React.Component {
             source={require("./assets/plate.png")} //TouchableOpacity  가 이제 버튼인데 안에 컴포넌트로 이미지를 넣으면 내가 원하는 모양의 버튼을 만들수 있는 컴포넌트 이미지 사용법은 이거 처럼  require("./as/as") 이러던가  source={{uri:"www.naver.com"}}
           ></Image>
         </TouchableOpacity>
+
+
 
 
       </View>

@@ -70,8 +70,12 @@ class RecoScreen extends React.Component {
         <Text>RecoScreen</Text>
         <Text>RecoScreen</Text>
         <Text>RecoScreen</Text>
-        <Text>RecoScreen</Text>
-        <Text>RecoScreen</Text>
+        <Text 
+         style={{fontSize:30,fontFamily:"example-font"}}
+          > THIS IS HOW YOU USE YOUR CUSTOM FONT</Text>
+           <Text 
+         style={{fontSize:30,fontFamily:"example2-font"}}
+          > THIS IS HOW YOU USE YOUR CUSTOM FONT</Text>
       </View>
       </ScrollView>
     );
