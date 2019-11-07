@@ -42,7 +42,11 @@ export default class App extends React.Component{
   }
   async loadFonts() {
     await Expo.Font.loadAsync({
+<<<<<<< HEAD
       'AlegreyaSans-Regular': require('./assets/fonts/AlegreyaSans-Regular.ttf')
+=======
+      'AlegreyaSans-Regular': require('C:/Users/loite/Documents/Projects/Repos/vs-choice/assets/fonts/AlegreyaSans-Regular.ttf')
+>>>>>>> 3cf4d9acff911cad971ed8d4aea30da5dc992777
     });
   }
   componentDidMount(){

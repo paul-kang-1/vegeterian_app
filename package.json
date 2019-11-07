@@ -26,8 +26,12 @@
     "react-native-web": "^0.11.7",
     "react-navigation": "^4.0.10",
     "react-navigation-stack": "^1.10.3",
+<<<<<<< HEAD
     "rx-core": "^4.0.8",
     "semver": "^6.3.0"
+=======
+    "rx-core": "^4.0.8"
+>>>>>>> 3cf4d9acff911cad971ed8d4aea30da5dc992777
   },
   "devDependencies": {
     "babel-preset-expo": "^7.1.0"

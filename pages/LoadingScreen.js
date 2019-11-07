@@ -1,11 +1,19 @@
 import React from 'react';
 import { StyleSheet, Text, View, Button, Image, ActivityIndicator } from 'react-native';  
+<<<<<<< HEAD
 import firebase from '../firebase';
+=======
+import firebase from 'firebase';
+>>>>>>> 3cf4d9acff911cad971ed8d4aea30da5dc992777
 import { firebaseConfig } from '../config';
 import HomeScreen from './HomeScreen';
 import * as Google from 'expo-google-app-auth';
 
+<<<<<<< HEAD
 
+=======
+firebase.initializeApp(firebaseConfig)
+>>>>>>> 3cf4d9acff911cad971ed8d4aea30da5dc992777
 
 export default class LoadingScreen extends React.Component{
     signInWithGoogleAsync = async () => {
@@ -29,6 +37,7 @@ export default class LoadingScreen extends React.Component{
       
     state = { toHomeScreen: false }
     componentDidMount(){
+<<<<<<< HEAD
       this.checkIfLoggedIn();
     }
     checkIfLoggedIn = () => { 
@@ -39,6 +48,18 @@ export default class LoadingScreen extends React.Component{
         this.setState({ toHomeScreen: false }) 
         }
          
+=======
+        this.checkIfLoggedIn();
+    }
+    checkIfLoggedIn = () => {
+        firebase.auth().onAuthStateChanged(user =>{
+            if(user) {
+                this.setState({ toHomeScreen: true })                         
+            } else {
+                this.setState({ toHomeScreen: false }) 
+            }
+        })
+>>>>>>> 3cf4d9acff911cad971ed8d4aea30da5dc992777
     }
 
     render(){
