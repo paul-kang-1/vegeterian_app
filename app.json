@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "vegeterian",
-    "slug": "vegeterian",
+    "name": "V's Choice",
+    "slug": "vs-choice",
     "privacy": "public",
     "sdkVersion": "35.0.0",
     "platforms": [
@@ -11,12 +11,6 @@
     ],
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
     "updates": {
       "fallbackToCacheTimeout": 0
     },
@@ -24,7 +18,10 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "com.vegeterian.vschoice"
     }
   }
 }
