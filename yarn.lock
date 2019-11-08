@@ -5176,8 +5176,13 @@ scheduler@^0.13.3:
 
 semver@^6.3.0:
   version "6.3.0"
+<<<<<<< HEAD
   resolved "https://registry.yarnpkg.com/semver/-/semver-6.3.0.tgz#ee0a64c8af5e8ceea67687b133761e1becbd1d3d"
   integrity sha512-b39TBaTSfV6yBrapU89p5fKekE2m/NwnDocOVruQFS1/veMgdzuPcnOM34M6CwxW8jH/lxEa5rBoDeUwu5HHTw==
+=======
+  resolved "http://r.cnpmjs.org/semver/download/semver-6.3.0.tgz#ee0a64c8af5e8ceea67687b133761e1becbd1d3d"
+  integrity sha1-7gpkyK9ejO6mdoexM3YeG+y9HT0=
+>>>>>>> 2f944b8752fede488c9c53666dbf2f1a02d56ce4
 
 send@0.17.1:
   version "0.17.1"
