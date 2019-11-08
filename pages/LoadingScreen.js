@@ -1,21 +1,68 @@
 import React from 'react';
-import { StyleSheet, Text, View, Button, Image, ActivityIndicator } from 'react-native';  
-<<<<<<< HEAD
+import { StyleSheet, Text, View, Button, Image, ActivityIndicator,TouchableOpacity } from 'react-native';  
 import firebase from '../firebase';
-=======
-import firebase from 'firebase';
->>>>>>> 3cf4d9acff911cad971ed8d4aea30da5dc992777
 import { firebaseConfig } from '../config';
 import HomeScreen from './HomeScreen';
 import * as Google from 'expo-google-app-auth';
+import * as Facebook from 'expo-facebook';
 
-<<<<<<< HEAD
 
-=======
-firebase.initializeApp(firebaseConfig)
->>>>>>> 3cf4d9acff911cad971ed8d4aea30da5dc992777
 
 export default class LoadingScreen extends React.Component{
+
+    async  signInWithFacebook() {
+        const { navigation } = this.props;
+        try {
+          const {
+            type,
+            token,
+            expires,
+            permissions,
+            declinedPermissions,
+          } = await Facebook.logInWithReadPermissionsAsync('1998302263810491', {
+            permissions: ['public_profile','email'],
+          });
+          if (type === 'success') {
+            // Get the user's name using Facebook's Graph API
+           // const response = await fetch(`https://graph.facebook.com/me?access_token=${token}`);
+           const response = await fetch(
+            `https://graph.facebook.com/me?access_token=${token}&fields=id,name,email,about,picture`
+          );
+           
+            const responseJSON = JSON.stringify(await response.json());
+            console.log(responseJSON);
+            var obj = JSON.parse(responseJSON);
+            console.log(obj.name);
+            console.log(obj.email);
+            console.log(obj.picture.data.url);
+             alert(obj.name);
+           
+           
+    
+          } else {
+            // type === 'cancel'
+          }
+        } catch ({ message }) {
+          console.log(`Facebook 1 Error: ${message}`);
+          alert("fisrt ${message}");
+        }
+    
+     
+        
+    
+    
+    
+    
+    
+    
+    
+          
+    
+    
+    
+    
+    
+      }
     signInWithGoogleAsync = async () => {
         try {
           const result = await Google.logInAsync({
@@ -37,7 +84,6 @@ export default class LoadingScreen extends React.Component{
       
     state = { toHomeScreen: false }
     componentDidMount(){
-<<<<<<< HEAD
       this.checkIfLoggedIn();
     }
     checkIfLoggedIn = () => { 
@@ -48,18 +94,6 @@ export default class LoadingScreen extends React.Component{
         this.setState({ toHomeScreen: false }) 
         }
          
-=======
-        this.checkIfLoggedIn();
-    }
-    checkIfLoggedIn = () => {
-        firebase.auth().onAuthStateChanged(user =>{
-            if(user) {
-                this.setState({ toHomeScreen: true })                         
-            } else {
-                this.setState({ toHomeScreen: false }) 
-            }
-        })
->>>>>>> 3cf4d9acff911cad971ed8d4aea30da5dc992777
     }
 
     render(){
@@ -78,7 +112,11 @@ export default class LoadingScreen extends React.Component{
                             <View style={{flex: 1}}/>
                             <View style={{flex: 1, justifyContent: "center"}}>
                                 <Text  style={styles.loginText}>Log in With:</Text>
+                                <TouchableOpacity
+                                
+                                onPress={()=> this.signInWithFacebook()}>
                                 <Image style={styles.loginButton} source={require('../assets/images/facebook_login.png')}/>
+                                </TouchableOpacity>
                                 <Button title='Sign in with Google' 
                                 onPress={()=> this.signInWithGoogleAsync()}/>
                             </View>
