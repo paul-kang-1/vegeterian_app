@@ -1,31 +1,64 @@
 import React from 'react';
 import { StyleSheet, Text, View, Button, Image, ActivityIndicator } from 'react-native';  
-<<<<<<< HEAD
-import firebase from '../firebase';
-=======
-import firebase from 'firebase';
->>>>>>> 3cf4d9acff911cad971ed8d4aea30da5dc992777
+import firebase, { googleProvider } from '../firebase';
 import { firebaseConfig } from '../config';
 import HomeScreen from './HomeScreen';
 import * as Google from 'expo-google-app-auth';
 
-<<<<<<< HEAD
-
-=======
-firebase.initializeApp(firebaseConfig)
->>>>>>> 3cf4d9acff911cad971ed8d4aea30da5dc992777
 
 export default class LoadingScreen extends React.Component{
+    isUserEqual = (googleUser, firebaseUser) => {
+        if (firebaseUser) {
+          var providerData = firebaseUser.providerData;
+          for (var i = 0; i < providerData.length; i++) {
+            if (providerData[i].providerId === googleProvider.PROVIDER_ID &&
+                providerData[i].uid === googleUser.getBasicProfile().getId()) {
+              // We don't need to reauth the Firebase connection.
+              return true;
+            }
+          }
+        }
+        return false;
+    }
+    onSignIn = googleUser => {
+        //console.log('Google Auth Response', googleUser);
+        // We need to register an Observer on Firebase Auth to make sure auth is initialized.
+        var unsubscribe = firebase.auth().onAuthStateChanged(function(firebaseUser) {
+          unsubscribe();
+          // Check if we are already signed-in Firebase with the correct user.
+          if (!this.isUserEqual(googleUser, firebaseUser)) {
+            // Build Firebase credential with the Google ID token.
+            const credential = googleProvider.credential(
+                googleUser.idToken, googleUser.accessToken);
+            // Sign in with credential from the Google user.
+            firebase.auth().signInWithCredential(credential)
+            .then(function(){console.log('User Signed In');})
+            .catch(function(error) {
+              // Handle Errors here.
+              var errorCode = error.code;
+              var errorMessage = error.message;
+              // The email of the user's account used.
+              var email = error.email;
+              // The firebase.auth.AuthCredential type that was used.
+              var credential = error.credential;
+              // ...
+            });
+          } else {
+            console.log('User already signed-in Firebase.');
+          }
+        }.bind(this));
+    }
+
     signInWithGoogleAsync = async () => {
         try {
           const result = await Google.logInAsync({
-            behavior: 'web',
             androidClientId: '386677764344-4f2lfkvaupm96uih0rg1afr5qh4o1fb0.apps.googleusercontent.com',
             iosClientId: '386677764344-oeoovf93253f509banm2rgl32l54fkj0.apps.googleusercontent.com',
             scopes: ['profile', 'email'],
           });
       
           if (result.type === 'success') {
+            this.onSignIn(result);
             return result.accessToken;
           } else {
             return { cancelled: true };
@@ -37,7 +70,6 @@ export default class LoadingScreen extends React.Component{
       
     state = { toHomeScreen: false }
     componentDidMount(){
-<<<<<<< HEAD
       this.checkIfLoggedIn();
     }
     checkIfLoggedIn = () => { 
@@ -48,18 +80,6 @@ export default class LoadingScreen extends React.Component{
         this.setState({ toHomeScreen: false }) 
         }
          
-=======
-        this.checkIfLoggedIn();
-    }
-    checkIfLoggedIn = () => {
-        firebase.auth().onAuthStateChanged(user =>{
-            if(user) {
-                this.setState({ toHomeScreen: true })                         
-            } else {
-                this.setState({ toHomeScreen: false }) 
-            }
-        })
->>>>>>> 3cf4d9acff911cad971ed8d4aea30da5dc992777
     }
 
     render(){
