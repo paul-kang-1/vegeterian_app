@@ -4,6 +4,7 @@ import axios from 'axios';
 import LoadingScreen from "./pages/LoadingScreen";
 
 
+
 const MAP_API = '0abbbf5654f34e6dbb2606e6765f5614';
 
 export default class App extends React.Component{
@@ -42,7 +43,13 @@ export default class App extends React.Component{
   }
   async loadFonts() {
     await Expo.Font.loadAsync({
+<<<<<<< HEAD
+
       'AlegreyaSans-Regular': require('./assets/fonts/AlegreyaSans-Regular.ttf')
+
+=======
+      'AlegreyaSans-Regular': require('./assets/fonts/AlegreyaSans-Regular.ttf')
+>>>>>>> 2f944b8752fede488c9c53666dbf2f1a02d56ce4
     });
   }
   componentDidMount(){
