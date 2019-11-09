@@ -17,7 +17,7 @@ export default class LoadingScreen extends React.Component{
         expires,
         permissions,
         declinedPermissions,
-      } = await Facebook.logInWithReadPermissionsAsync('1998302263810491', {
+      } = await Facebook.logInWithReadPermissionsAsync('1376505772512509', {
         permissions: ['public_profile','email'],
       });
       if (type === 'success') {
@@ -29,12 +29,14 @@ export default class LoadingScreen extends React.Component{
         const responseJSON = JSON.stringify(await response.json());
         var obj = JSON.parse(responseJSON);
         alert(obj.name);   
+        this.setState({ toHomeScreen: true })     
       } else {
         // type === 'cancel'
       }
     } catch ({ message }) {
       console.log(`Facebook 1 Error: ${message}`);
       alert("fisrt ${message}");
+      this.setState({ toHomeScreen: true })                
     }  
   }
 
