@@ -4,7 +4,7 @@ import firebase, { googleProvider } from '../firebase';
 import { firebaseConfig } from '../config';
 import HomeScreen from './HomeScreen';
 import * as Google from 'expo-google-app-auth';
-
+import Svg from 'react-native-svg';
 
 export default class LoadingScreen extends React.Component{
     isUserEqual = (googleUser, firebaseUser) => {
