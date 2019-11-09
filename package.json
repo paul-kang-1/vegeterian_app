@@ -10,7 +10,7 @@
   "dependencies": {
     "axios": "^0.19.0",
     "expo": "^35.0.0",
-    "expo-facebook": "~7.0.0",
+    "expo-facebook": "^7.0.0",
     "expo-font": "^7.0.0",
     "expo-google-app-auth": "^7.0.0",
     "expo-google-sign-in": "^7.0.0",
@@ -28,12 +28,7 @@
     "react-native-web": "^0.11.7",
     "react-navigation": "^4.0.10",
     "react-navigation-stack": "^1.10.3",
-<<<<<<< HEAD
     "rx-core": "^4.0.8"
-=======
-    "rx-core": "^4.0.8",
-    "semver": "^6.3.0"
->>>>>>> 2f944b8752fede488c9c53666dbf2f1a02d56ce4
   },
   "devDependencies": {
     "babel-preset-expo": "^7.1.0"
