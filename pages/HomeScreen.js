@@ -9,6 +9,9 @@ import {
   Dimensions,
   Image
 } from "react-native";
+
+
+import Modal from 'react-native-modal';
 import firebase, { storage } from "../firebase";
 
 class HomeScreen extends Component {
@@ -18,7 +21,7 @@ class HomeScreen extends Component {
     super(props);
 
     this.state = {
-
+      commentVisible: false,
       datasource: [],
 
     };
@@ -27,7 +30,12 @@ class HomeScreen extends Component {
 
     this.makeRemoteRequest();
   }
-
+   
+  onClickComment=()=>{
+    this.setState({
+      commentVisible: !this.state.commentVisible,
+  });
+  }
   makeRemoteRequest = () => {
 
 
@@ -94,7 +102,53 @@ class HomeScreen extends Component {
   render() {
     return (
       <View style={styles.container}>
+        <Modal
+                    testID={'modal'}
+                    transparent={true}
+                    isVisible={this.state.commentVisible}
+                    backdropColor = {'white'}
+                    backdropOpacity = {0.5}
+                    animationIn="slideInRight"
+                    animationOut="slideOutRight"
+         
+                    onSwipeComplete={() => this.setState({ commentVisible: false })}
+                   
+                    swipeDirection={['right']}>
+                 
+                      
+                            
+                    <View
+                         style={{
+                         
+                           
+                        }}
+                    >
+                         <TouchableOpacity
+                            onPress={() => this.onClickComment()}
+                        >
+                       
+                       <Image
+         style={{marginTop:30,height:205,width:205,borderRadius:75}}
+         source={{uri:"https://firebasestorage.googleapis.com/v0/b/vs-choice.appspot.com/o/87c7440df539f7073e5c3b17e137a810.jpg?alt=media&token=92ea41d8-deef-42e5-9191-8a1ea89c5e78"}}
+        ></Image>
+                       </TouchableOpacity>
+                    </View>
+                   
+                </Modal>
+
+
+
+
+        <TouchableOpacity
+         onPress={() => this.onClickComment()}>
+        <Image
+         style={{marginTop:30,height:75,width:75,borderRadius:75}}
+         source={{uri:"https://firebasestorage.googleapis.com/v0/b/vs-choice.appspot.com/o/87c7440df539f7073e5c3b17e137a810.jpg?alt=media&token=92ea41d8-deef-42e5-9191-8a1ea89c5e78"}}
+        >
+          </Image>
+          </TouchableOpacity>
         <Text style={{ marginTop: 200 }}>homescreen</Text>
+         
         <FlatList
 
           data={this.state.datasource}
