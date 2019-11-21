@@ -1,180 +1,102 @@
-import React, { Component } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  ImageBackground,
-  Dimensions,
-  Image
-} from "react-native";
 
-
-import Modal from 'react-native-modal';
+import React, { Component, useState, useEffect } from "react";
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from "react-native";
+import axios from "axios";
+import * as Location from "expo-location";
 import firebase, { storage } from "../firebase";
 
-class HomeScreen extends Component {
+const MAP_API = "0abbbf5654f34e6dbb2606e6765f5614";
 
+const HomeScreen = () => {
+  const [address, setAddress] = useState("");
+  const [dataSource, setDataSource] = useState([]);
 
-  constructor(props) {
-    super(props);
+  const getAddress = async (latitude, longitude) => {
+    const {
+      data: { results }
+    } = await axios.get(
+      `http://api.opencagedata.com/geocode/v1/json?key=${MAP_API}&q=${latitude}%2C${longitude}&pretty=1`
+    );
+    const comp = results[0].components;
+    if (comp.town) {
+      loc = comp.town;
+    } else if (comp.neighborhood) {
+      loc = comp.neighborhood;
+    } else if (comp.county) {
+      loc = comp.county;
+    } else {
+      loc = comp.city;
+    }
+    setAddress(loc);
+  };
 
-    this.state = {
-      commentVisible: false,
-      datasource: [],
+  const getLocation = async () => {
+    try {
+      await Location.requestPermissionsAsync();
+      const {
+        coords: { latitude, longitude }
+      } = await Location.getCurrentPositionAsync();
+      getAddress(latitude, longitude);
+    } catch (error) {
+      Alert.alert("Permission denied!");
+    }
 
-    };
   }
   componentDidMount() {
 
-    this.makeRemoteRequest();
-  }
-   
-  onClickComment=()=>{
-    this.setState({
-      commentVisible: !this.state.commentVisible,
-  });
-  }
-  makeRemoteRequest = () => {
-
-
-
-
-
+  const makeRemoteRequest = () => {
     var usersRef = firebase.database().ref('resaturant');
-
-
     usersRef.on('value', (snapshot) => {
-
-
       var m = snapshot.val()
       var keys = Object.values(m);
-
-      this.setState({
-        datasource: keys
-      })
+      setDataSource(keys);
     });
   }
-  renderItem = ({ item }) => {
-    let dimensions = Dimensions.get("window");
-    let imageheight = 2 * dimensions.height / 14
-    let imagewidth = dimensions.width - 30;
+
+
+  const renderItem = ({ item }) => {
     return (
-      <TouchableOpacity
-        style={{ marginTop: 20 }}
-        onPress={() => { }
-
-
-
-
-        }
-      >
-        <ImageBackground style={{
-          height: imageheight, width: imagewidth,
-        }}
-          imageStyle={{ borderTopLeftRadius: 20, borderTopRightRadius: 20 }}
-          source={{ uri: item.image }}>
-          <View style={{ flex: 1, marginLeft: 10, marginBottom: 6, borderColor: 'black' }} >
-
-
-
-
-
-          </View>
-        </ImageBackground>
-        <View style={{ borderBottomWidth: 2, borderLeftWidth: 1, borderRightWidth: 1, borderBottomLeftRadius: 20, borderBottomRightRadius: 20, height: imageheight / 2 }}>
-          <View  >
+      <TouchableOpacity onPress={() => { }}>
+        <View style={{ flex: 1, marginLeft: 10, marginBottom: 6, borderColor: 'black' }} >
+          <Image style={styles.icon} source={{ uri: item.image }} />
+          <View>
             <Text>{item.name}</Text>
           </View>
         </View>
       </TouchableOpacity>
-
-
-
-
     )
 
+  useEffect(() => {
+    getLocation();
+    makeRemoteRequest();
+  });
 
-
-  }
-
-  render() {
-    return (
-      <View style={styles.container}>
-        <Modal
-                    testID={'modal'}
-                    transparent={true}
-                    isVisible={this.state.commentVisible}
-                    backdropColor = {'white'}
-                    backdropOpacity = {0.5}
-                    animationIn="slideInRight"
-                    animationOut="slideOutRight"
-         
-                    onSwipeComplete={() => this.setState({ commentVisible: false })}
-                   
-                    swipeDirection={['right']}>
-                 
-                      
-                            
-                    <View
-                         style={{
-                         
-                           
-                        }}
-                    >
-                         <TouchableOpacity
-                            onPress={() => this.onClickComment()}
-                        >
-                       
-                       <Image
-         style={{marginTop:30,height:205,width:205,borderRadius:75}}
-         source={{uri:"https://firebasestorage.googleapis.com/v0/b/vs-choice.appspot.com/o/87c7440df539f7073e5c3b17e137a810.jpg?alt=media&token=92ea41d8-deef-42e5-9191-8a1ea89c5e78"}}
-        ></Image>
-                       </TouchableOpacity>
-                    </View>
-                   
-                </Modal>
-
-
-
-
-        <TouchableOpacity
-         onPress={() => this.onClickComment()}>
-        <Image
-         style={{marginTop:30,height:75,width:75,borderRadius:75}}
-         source={{uri:"https://firebasestorage.googleapis.com/v0/b/vs-choice.appspot.com/o/87c7440df539f7073e5c3b17e137a810.jpg?alt=media&token=92ea41d8-deef-42e5-9191-8a1ea89c5e78"}}
-        >
-          </Image>
-          </TouchableOpacity>
-        <Text style={{ marginTop: 200 }}>homescreen</Text>
-         
-        <FlatList
-
-          data={this.state.datasource}
-
-          renderItem={this.renderItem}
-
-
-          keyExtractor={item => item.name}
-          initialNumToRender={4}
-          maxToRenderPerBatch={4}
-
-          onRefresh={this.handleRefresh}
-          refreshing={this.state.refreshing}
-
-          onEndReachedThreshold={10000000}
-
-
-        />
-
-      </View>
-    );
-  }
-}
+  return (
+    <View style={styles.container}>
+      <Text>{address}</Text>
+      <FlatList
+        data={dataSource}
+        renderItem={renderItem}
+        keyExtractor={item => item.name}
+        initialNumToRender={4}
+        maxToRenderPerBatch={4}
+        //onRefresh={this.handleRefresh}
+        //refreshing={this.state.refreshing}
+        //onEndReachedThreshold={10000000}
+      />
+    </View>
+  );
+};
 export default HomeScreen;
 
 const styles = StyleSheet.create({
+  container2: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+=======
+
   icon: {
     height: 70,
     width: 70
@@ -184,4 +106,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center'
   }
+
 });
+
