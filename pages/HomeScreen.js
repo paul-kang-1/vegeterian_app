@@ -1,3 +1,4 @@
+
 import React, { Component, useState, useEffect } from "react";
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from "react-native";
 import axios from "axios";
@@ -39,7 +40,9 @@ const HomeScreen = () => {
     } catch (error) {
       Alert.alert("Permission denied!");
     }
+
   }
+  componentDidMount() {
 
   const makeRemoteRequest = () => {
     var usersRef = firebase.database().ref('resaturant');
@@ -49,6 +52,7 @@ const HomeScreen = () => {
       setDataSource(keys);
     });
   }
+
 
   const renderItem = ({ item }) => {
     return (
@@ -61,7 +65,6 @@ const HomeScreen = () => {
         </View>
       </TouchableOpacity>
     )
-  }
 
   useEffect(() => {
     getLocation();
@@ -92,6 +95,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center"
   },
+=======
+
   icon: {
     height: 70,
     width: 70
@@ -101,4 +106,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center'
   }
+
 });
+
