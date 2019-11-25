@@ -1,3 +1,4 @@
+
 import React, { Component, useState, useEffect } from "react";
 import {
   View,
@@ -162,4 +163,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: "OpenSans-SemiBold"
   }
+
 });
+
