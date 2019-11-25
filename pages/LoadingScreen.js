@@ -120,6 +120,7 @@ const LoadingScreen = ({ showLogin }) => {
 
   useEffect(() => {
     checkIfLoggedIn();
+    console.disableYellowBox = true;
   });
 
   const checkIfLoggedIn = () => {
