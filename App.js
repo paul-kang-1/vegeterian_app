@@ -6,8 +6,9 @@ const App = () => {
   const [isLoading, setLoading] = useState(true);
   const loadFonts = async () => {
     await Font.loadAsync({
-      'AlegreyaSans-Regular': require('./assets/fonts/AlegreyaSans-Regular.ttf'),
-      'OpenSans-SemiBold': require('./assets/fonts/OpenSans-SemiBold.ttf')
+      "AlegreyaSans-Regular": require("./assets/fonts/AlegreyaSans-Regular.ttf"),
+      "OpenSans-SemiBold": require("./assets/fonts/OpenSans-SemiBold.ttf"),
+      "El-Messiri-SemiBold": require("./assets/fonts/ElMessiri-SemiBold.ttf")
     });
     setLoading(false)
   }

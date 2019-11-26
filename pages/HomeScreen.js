@@ -1,4 +1,3 @@
-
 import React, { Component, useState, useEffect } from "react";
 import {
   View,
@@ -19,14 +18,14 @@ const HomeScreen = () => {
   const [dataSource, setDataSource] = useState([]);
 
   const getAddress = async (latitude, longitude) => {
-    console.log('getaddress')
+    console.log("getaddress");
     const {
       data: { results }
     } = await axios.get(
       `http://api.opencagedata.com/geocode/v1/json?key=${MAP_API}&q=${latitude}%2C${longitude}&pretty=1`
     );
     const comp = results[0].components;
-    console.log('comp', comp)
+    console.log("comp", comp);
     if (comp.town) {
       loc = comp.town;
     } else if (comp.neighborhood) {
@@ -68,9 +67,7 @@ const HomeScreen = () => {
           console.log("running");
         }}
       >
-        <View
-          style={styles.imageCard}
-        >
+        <View style={styles.imageCard}>
           <Image style={styles.thumbnail} source={{ uri: item.image }} />
           <View>
             <Text style={styles.restaurantTitle}>{item.name}</Text>
@@ -81,10 +78,10 @@ const HomeScreen = () => {
   };
 
   useEffect(() => {
-    console.log('useeffect called')
+    console.log("useeffect called");
     getLocation();
     makeRemoteRequest();
-  },[]);
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -96,18 +93,21 @@ const HomeScreen = () => {
       </View>
       <View
         style={{
-          flex:1,
-          width: '100%',
+          flex: 1,
+          flexDirection: "row",
+          width: "100%",
           paddingBottom: 20,
-          borderWidth: 5,
-          borderColor: "red",
-          justifyContent: "center",
-          paddingTop: 50
+          justifyContent: "space-between",
+          paddingTop: 60,
+          paddingLeft: 20
         }}
       >
-        <Text>{address}</Text>
+        <Text style={styles.pageTitle}>{"V's Pick"}</Text>
+        <TouchableOpacity>
+          
+        </TouchableOpacity>
       </View>
-      <View style={{flex:5}}>
+      <View style={{ flex: 10 }}>
         <FlatList
           data={dataSource}
           renderItem={renderItem}
@@ -125,17 +125,19 @@ const HomeScreen = () => {
 export default HomeScreen;
 
 const styles = StyleSheet.create({
+  pageTitle: {
+    fontFamily: "El-Messiri-SemiBold",
+    fontSize: 45
+  },
   backgroundContainer: {
     position: "absolute",
-    top:0,
+    top: 0,
     left: 0,
-    right: 0,
-  }
-  ,
+    right: 0
+  },
   domaImage: {
     alignSelf: "flex-end"
-  }
-  ,
+  },
   thumbnail: {
     width: 300,
     height: 300
@@ -146,8 +148,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     borderColor: "black",
     borderWidth: 4
-  }
-  ,
+  },
   container: {
     flex: 1,
     alignItems: "center",
@@ -163,6 +164,4 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontFamily: "OpenSans-SemiBold"
   }
-
 });
-
