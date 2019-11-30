@@ -101,7 +101,28 @@ const HomeScreen = () => {
           />
         </View>
         <View style={[styles.vsPick, styles.shadow]}>
-          <Text>{address}</Text>
+          <View style={{ flex: 3, paddingHorizontal:10, marginVertical:5 }}>
+            <Text style={{ fontFamily: "OpenSans-SemiBold", fontSize: 30 }}>
+              Restaurant Testing
+            </Text>
+            <Text style={{ fontFamily: "OpenSans-Regular", fontSize: 13 }}>
+              (Restaurant description goes here) brinjal is a plant species in
+              the nightshade family Solanaceae. Solanum melongena is grown
+              worldwide for its edible fruit.
+            </Text>
+          </View>
+          <View style={{ flex: 5 }}>
+            <Image
+              style={{
+                flex: 1,
+                width: null,
+                height: null,
+                resizeMode: "cover"
+              }}
+              source={require("../assets/images/veggie_food_4.jpg")}
+            />
+          </View>
+          <View style={{ flex: 3 }}></View>
         </View>
         <View style={styles.titleContainer2}>
           <Text style={styles.pageTitle}>{"Around You"}</Text>
@@ -140,8 +161,7 @@ const styles = StyleSheet.create({
   vsPick: {
     height: 400,
     marginHorizontal: 15,
-    paddingHorizontal: 10,
-    paddingBottom: 10,
+    //paddingHorizontal: 10,
     backgroundColor: "white",
     justifyContent: "center",
     borderRadius: 8
