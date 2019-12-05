@@ -5,8 +5,8 @@ const SelectionScreen = () => {
   const [toHomeScreen, setToHomeScreen] = useState(false);
 
   return (
-    <View style={styles.container}>
-      <Text>SelectionScreen</Text>
+    <View>
+      <Text>eeeee</Text>
     </View>
   );
 };
