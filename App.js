@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import LoadingScreen from "./pages/LoadingScreen";
+import HomeScreen from "./pages/HomeScreen";
 import * as Font from 'expo-font';
+import { createAnimatedSwitchNavigator } from "react-navigation-animated-switch";
+
+const MySwitch = createAnimatedSwitchNavigator({
+  Home: {screen: HomeScreen},
+  Loading: {screen: LoadingScreen}
+});
 
 const App = () => {
   const [isLoading, setLoading] = useState(true);
