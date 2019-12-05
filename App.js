@@ -1,19 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import LoadingScreen from "./pages/LoadingScreen";
-import * as Font from 'expo-font';
+import HomeScreen from "./pages/HomeScreen";
+import { createAppContainer } from "react-navigation";
+import createAnimatedSwitchNavigator from "react-navigation-animated-switch";
 
-const App = () => {
-  const [isLoading, setLoading] = useState(true);
-  const loadFonts = async () => {
-    await Font.loadAsync({
-      'AlegreyaSans-Regular': require('./assets/fonts/AlegreyaSans-Regular.ttf')
-    });
-    setLoading(false)
-  }
-  useEffect(() => {
-    loadFonts()
-  }, [])
-  return <LoadingScreen showLogin = {!isLoading} />
-}
+const MySwitch = createAnimatedSwitchNavigator(
+  {
+    Loading: { screen: LoadingScreen },
+    Home: { screen: HomeScreen }
+  },
+  { initialRouteName: "Loading" }
+);
 
-export default App;
+export default createAppContainer(MySwitch);
