@@ -8,14 +8,13 @@ import {
   TouchableOpacity
 } from "react-native";
 import firebase, { googleProvider } from "../firebase";
-import HomeScreen from "./HomeScreen";
 import * as Google from "expo-google-app-auth";
 import * as Facebook from "expo-facebook";
 import * as Font from "expo-font";
-import { useNavigation, useNavigationParam } from "react-navigation-hooks";
+import { useNavigation } from "react-navigation-hooks";
 
 const LoadingScreen = () => {
-  const { navigate } = useNavigation();
+  const  navigation = useNavigation();
   const [showLogin, setLogin] = useState(false);
   const [toHomeScreen, setHomescreen] = useState(false);
   const loadFonts = async () => {
@@ -48,7 +47,7 @@ const LoadingScreen = () => {
         var obj = JSON.parse(responseJSON);
         console.log(obj.name);
         //setHomescreen(true);
-        navigate("Home");
+        navigation.navigate('Home')
       } else {
         // type === 'cancel'
       }
