@@ -11,10 +11,8 @@ import firebase, { googleProvider } from "../firebase";
 import * as Google from "expo-google-app-auth";
 import * as Facebook from "expo-facebook";
 import * as Font from "expo-font";
-import { useNavigation } from "react-navigation-hooks";
 
-const LoadingScreen = () => {
-  const  navigation = useNavigation();
+const LoadingScreen = ({ navigation }) => {
   const [showLogin, setLogin] = useState(false);
   const [toHomeScreen, setHomescreen] = useState(false);
   const loadFonts = async () => {
@@ -39,15 +37,14 @@ const LoadingScreen = () => {
       });
       if (type === "success") {
         // Get the user's name using Facebook's Graph API
-        // const response = await fetch(`https://graph.facebook.com/me?access_token=${token}`);
         const response = await fetch(
           `https://graph.facebook.com/me?access_token=${token}&fields=id,name,email,about,picture`
         );
         const responseJSON = JSON.stringify(await response.json());
         var obj = JSON.parse(responseJSON);
-        console.log(obj.name);
+        console.log(obj);
         //setHomescreen(true);
-        navigation.navigate('Home')
+        navigation.navigate("Home", {photoUrl: obj.picture.data.url});
       } else {
         // type === 'cancel'
       }
@@ -93,7 +90,7 @@ const LoadingScreen = () => {
             .signInWithCredential(credential)
             .then(function() {
               //setHomescreen(true);
-              navigate("Home");
+              navigation.navigate("Home", { photoUrl: googleUser.user.photoUrl });
             })
             .catch(function(error) {
               // Handle Errors here.
@@ -123,6 +120,7 @@ const LoadingScreen = () => {
 
       if (result.type === "success") {
         onSignIn(result);
+        //console.log(result.user.photoUrl)
         return result.accessToken;
       } else {
         return { cancelled: true };
@@ -141,7 +139,8 @@ const LoadingScreen = () => {
   const checkIfLoggedIn = () => {
     if (firebase.auth().currentUser != null) {
       //setHomescreen(true);
-      navigate("Home");
+      console.log("The object is",firebase.auth().currentUser)
+      navigation.navigate("Home");
     } else {
       setHomescreen(false);
     }

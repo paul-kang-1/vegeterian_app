@@ -1,29 +1,22 @@
 import React, { useState, useEffect } from "react";
 import LoadingScreen from "./pages/LoadingScreen";
 import HomeScreen from "./pages/HomeScreen";
-import { createAppContainer } from "react-navigation";
-import createAnimatedSwitchNavigator from "react-navigation-animated-switch";
-import { Transition } from "react-native-reanimated";
+import { NavigationNativeContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
 
-const MySwitch = createAnimatedSwitchNavigator(
-  {
-    Loading: { screen: LoadingScreen },
-    Home: { screen: HomeScreen }
-  },
-  {
-    // The previous screen will slide to the bottom while the next screen will fade in
-    transition: (
-      <Transition.Together>
-        <Transition.Out
-          type= "slide-left"
-          durationMs={200}
-          interpolation= "easeOut"
-        />
-        <Transition.In type="fade" durationMs={500} />
-      </Transition.Together>
-    )
-  },
-  { initialRouteName: "Loading" }
-);
+const Stack = createStackNavigator();
 
-export default createAppContainer(MySwitch);
+const App = () => {
+  return (
+    <NavigationNativeContainer>
+      <Stack.Navigator
+        initialRouteName="Loading"
+        headerMode="none"
+      >
+        <Stack.Screen name="Loading" component={LoadingScreen} />
+        <Stack.Screen name="Home" component={HomeScreen} />
+      </Stack.Navigator>
+    </NavigationNativeContainer>
+  );
+};
+export default App;

@@ -1,4 +1,4 @@
-import React, { Component, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -12,14 +12,16 @@ import axios from "axios";
 import * as Location from "expo-location";
 import firebase, { storage } from "../firebase";
 import Constants from "expo-constants";
-import { black } from "ansi-colors";
+import { refreshAsync } from "expo-app-auth";
 
 const MAP_API = "0abbbf5654f34e6dbb2606e6765f5614";
 
-const HomeScreen = () => {
+const HomeScreen = ({ route, navigation }) => {
   const [address, setAddress] = useState("");
   const [dataSource, setDataSource] = useState([]);
   const [scrollEnabled, setScroll] = useState(false);
+
+  const { photoUrl } = route.params;
 
   const getAddress = async (latitude, longitude) => {
     console.log("getaddress");
@@ -68,7 +70,7 @@ const HomeScreen = () => {
     return (
       <TouchableOpacity
         onPress={() => {
-          console.log("running");
+          console.log("running", photoUrl);
         }}
       >
         <View style={[styles.imageCard, styles.shadow]}>
@@ -82,23 +84,52 @@ const HomeScreen = () => {
   };
 
   useEffect(() => {
-    console.log("useeffect called");
     getLocation();
     makeRemoteRequest();
   }, []);
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        style={{ flex: 1, maxWidth: "100%" }}
-        //contentContainerStyle={{height:350, maxWidth: "100%" }}
-      >
+      <ScrollView style={{ flex: 1, width: "100%" }}>
         <View style={styles.titleContainer}>
           <Text style={styles.pageTitle}>{"V's Pick"}</Text>
           <Image
-            style={{ alignSelf: "flex-end" }}
+            style={{
+              position: "absolute",
+              right: 0,
+              top: 0
+            }}
             source={require("../assets/images/doma.png")}
           />
+          <TouchableOpacity 
+            style={{
+              justifyContent: "center",
+              alignSelf: "center",
+              backgroundColor: 'rgba(52, 52, 52, 0.5)',
+              marginRight: 20,
+              height: 68,
+              width: 68,
+              borderRadius: 34,
+              alignItems:"center"
+            }}
+          >
+            <View
+              style={{
+                justifyContent: "center",
+                alignContent: "center",
+                backgroundColor: "black",
+                width: 56,
+                height: 56,
+                borderRadius: 28,
+                overflow: "hidden"
+              }}
+            >
+              <Image
+                style={{width:'100%', height:'100%'}}
+                source={{ uri: photoUrl}}
+              />
+            </View>
+          </TouchableOpacity>
         </View>
         <View style={[styles.vsPick, styles.shadow]}>
           <Text>{address}</Text>
@@ -151,9 +182,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     width: "100%",
     justifyContent: "space-between",
-    paddingTop: 60,
-    paddingLeft: 20,
-    marginBottom: 5
+    paddingTop: Constants.statusBarHeight,
+    paddingLeft: 20
   },
   titleContainer2: {
     flex: 0,
