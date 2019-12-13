@@ -6,13 +6,16 @@ import {
   FlatList,
   TouchableOpacity,
   Image,
-  ScrollView
+  ScrollView,
+  BackHandler,
+  Alert,
+  Animated,
+  ToastAndroid
 } from "react-native";
 import axios from "axios";
 import * as Location from "expo-location";
 import firebase, { storage } from "../firebase";
 import Constants from "expo-constants";
-import { refreshAsync } from "expo-app-auth";
 
 const MAP_API = "0abbbf5654f34e6dbb2606e6765f5614";
 
@@ -20,8 +23,8 @@ const HomeScreen = ({ route, navigation }) => {
   const [address, setAddress] = useState("");
   const [dataSource, setDataSource] = useState([]);
   const [scrollEnabled, setScroll] = useState(false);
-
-  const { photoUrl } = route.params;
+  const [backClickCount, setBackClickCount] = useState(0);
+  //const { photoUrl } = route.params;
 
   const getAddress = async (latitude, longitude) => {
     console.log("getaddress");
@@ -70,7 +73,7 @@ const HomeScreen = ({ route, navigation }) => {
     return (
       <TouchableOpacity
         onPress={() => {
-          console.log("running", photoUrl);
+          //console.log("running", photoUrl);
         }}
       >
         <View style={[styles.imageCard, styles.shadow]}>
@@ -88,6 +91,24 @@ const HomeScreen = ({ route, navigation }) => {
     makeRemoteRequest();
   }, []);
 
+  backButtonEffect = () => {
+    ToastAndroid.show("Press Back again to Exit", ToastAndroid.SHORT)
+    setBackClickCount(1)
+    setTimeout(function(){setBackClickCount(0)}, 1000)
+  }
+
+  handleBackButton = () => {
+    backClickCount == 1 ? BackHandler.exitApp() : backButtonEffect();
+    return true;
+  };
+
+  useEffect(() => {
+    BackHandler.addEventListener("hardwareBackPress", handleBackButton);
+    return () => {
+      BackHandler.removeEventListener("hardwareBackPress", handleBackButton);
+    };
+  }, [handleBackButton]);   
+
   return (
     <View style={styles.container}>
       <ScrollView style={{ flex: 1, width: "100%" }}>
@@ -101,16 +122,16 @@ const HomeScreen = ({ route, navigation }) => {
             }}
             source={require("../assets/images/doma.png")}
           />
-          <TouchableOpacity 
+          {/* <TouchableOpacity
             style={{
               justifyContent: "center",
               alignSelf: "center",
-              backgroundColor: 'rgba(52, 52, 52, 0.5)',
+              backgroundColor: "rgba(52, 52, 52, 0.5)",
               marginRight: 20,
               height: 68,
               width: 68,
               borderRadius: 34,
-              alignItems:"center"
+              alignItems: "center"
             }}
           >
             <View
@@ -125,11 +146,11 @@ const HomeScreen = ({ route, navigation }) => {
               }}
             >
               <Image
-                style={{width:'100%', height:'100%'}}
-                source={{ uri: photoUrl}}
+                style={{ width: "100%", height: "100%" }}
+                source={{ uri: photoUrl }}
               />
             </View>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
         <View style={[styles.vsPick, styles.shadow]}>
           <Text>{address}</Text>

@@ -1158,6 +1158,13 @@
   resolved "https://registry.yarnpkg.com/@react-native-community/masked-view/-/masked-view-0.1.5.tgz#25421be6cd943a4b1660b62cfbcd45be8891462c"
   integrity sha512-Lj1DzfCmW0f4HnmHtEuX8Yy2f7cnUA8r5KGGUuDDGtQt1so6QJkKeUmsnLo2zYDtsF8due6hvIL06Vdo5xxuLQ==
 
+"@react-navigation/bottom-tabs@^5.0.0-alpha.22":
+  version "5.0.0-alpha.22"
+  resolved "https://registry.yarnpkg.com/@react-navigation/bottom-tabs/-/bottom-tabs-5.0.0-alpha.22.tgz#7d0f19e957dafd9c83d5a53fd1fadaee5f1fa19f"
+  integrity sha512-z4O7dqtcEKb0ywkrOfktqoggY1u8ATnGscGKu3g+sO62Ie6mUScDiBhD19tjKmJIaMaXZMiR79XvYk0gtOrQzw==
+  dependencies:
+    "@react-navigation/routers" "^5.0.0-alpha.15"
+
 "@react-navigation/core@^5.0.0-alpha.25":
   version "5.0.0-alpha.25"
   resolved "https://registry.yarnpkg.com/@react-navigation/core/-/core-5.0.0-alpha.25.tgz#35362e013916db4a932afc60bea5d67336482bd3"
