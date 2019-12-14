@@ -11,26 +11,52 @@ import {
   ToastAndroid
 } from "react-native";
 import Constants from "expo-constants";
-import { firestore } from "firebase";
+import { firestore, storage } from "firebase";
 
-const MAP_API = "0abbbf5654f34e6dbb2606e6765f5614";
+//const MAP_API = "0abbbf5654f34e6dbb2606e6765f5614";
 
 const HomeScreen = ({ route, navigation }) => {
   const [dataSource, setDataSource] = useState([]);
   const [backClickCount, setBackClickCount] = useState(0);
   const [loading, setLoading] = useState(true); // for data
   //const { photoUrl } = route.params;
+  // Now we get the references of these images
+  const listurl = id => {
+    const storageRef = storage().ref(id);
+    return storageRef
+      .listAll()
+      .then(function(result) {
+        result.items.forEach(function(imageRef) {
+          // And finally display them
+          displayImage(imageRef);
+        });
+      })
+      .catch(function(error) {
+        // Handle any errors
+      });
+  };
 
+  function displayImage(imageRef) {
+    imageRef
+      .getDownloadURL()
+      .then(function(url) {
+        // TODO: Display the image on the UI
+        console.log(url);
+      })
+      .catch(function(error) {
+        // Handle any errors
+      });
+  }
   const makeRemoteRequest = () => {
     const ref = firestore().collection("restaurants");
     return ref.onSnapshot(querySnapshot => {
       const restaurants = [];
       querySnapshot.forEach(doc => {
-        const { name, rating, address, type, thumbnail } = doc.data();
+        const { name, rating, type, thumbnail } = doc.data();
         restaurants.push({
+          id: doc.id,
           name,
           rating,
-          address,
           type,
           thumbnail
         });
@@ -46,6 +72,7 @@ const HomeScreen = ({ route, navigation }) => {
     return (
       <TouchableOpacity
         onPress={() => {
+          listurl(item.id);
         }}
       >
         <View style={[styles.imageCard, styles.shadow]}>
@@ -134,7 +161,7 @@ const elevationShadowStyle = elevation => {
 const styles = StyleSheet.create({
   shadow: elevationShadowStyle(4),
   vsPick: {
-    height: 400,
+    height: 320,
     marginHorizontal: 15,
     paddingHorizontal: 10,
     paddingBottom: 10,
