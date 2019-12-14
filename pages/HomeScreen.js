@@ -8,64 +8,37 @@ import {
   Image,
   ScrollView,
   BackHandler,
-  Alert,
-  Animated,
   ToastAndroid
 } from "react-native";
-import axios from "axios";
-import * as Location from "expo-location";
-import firebase, { storage } from "../firebase";
 import Constants from "expo-constants";
+import { firestore } from "firebase";
 
 const MAP_API = "0abbbf5654f34e6dbb2606e6765f5614";
 
 const HomeScreen = ({ route, navigation }) => {
-  const [address, setAddress] = useState("");
   const [dataSource, setDataSource] = useState([]);
-  const [scrollEnabled, setScroll] = useState(false);
   const [backClickCount, setBackClickCount] = useState(0);
+  const [loading, setLoading] = useState(true); // for data
   //const { photoUrl } = route.params;
 
-  const getAddress = async (latitude, longitude) => {
-    console.log("getaddress");
-    const {
-      data: { results }
-    } = await axios.get(
-      `http://api.opencagedata.com/geocode/v1/json?key=${MAP_API}&q=${latitude}%2C${longitude}&pretty=1`
-    );
-    const comp = results[0].components;
-    console.log("comp", comp);
-    if (comp.town) {
-      loc = comp.town;
-    } else if (comp.neighborhood) {
-      loc = comp.neighborhood;
-    } else if (comp.county) {
-      loc = comp.county;
-    } else {
-      loc = comp.city;
-    }
-    //console.log('location: ',loc);
-    setAddress(loc);
-  };
-
-  const getLocation = async () => {
-    try {
-      await Location.requestPermissionsAsync();
-      const {
-        coords: { latitude, longitude }
-      } = await Location.getCurrentPositionAsync();
-      getAddress(latitude, longitude);
-    } catch (error) {
-      Alert.alert("Permission denied!");
-    }
-  };
-
   const makeRemoteRequest = () => {
-    var usersRef = firebase.database().ref("resaturant");
-    usersRef.on("value", snapshot => {
-      var m = snapshot.val();
-      var keys = Object.values(m);
-      setDataSource(keys);
+    const ref = firestore().collection("restaurants");
+    return ref.onSnapshot(querySnapshot => {
+      const restaurants = [];
+      querySnapshot.forEach(doc => {
+        const { name, rating, address, type, thumbnail } = doc.data();
+        restaurants.push({
+          name,
+          rating,
+          address,
+          type,
+          thumbnail
+        });
+      });
+      setDataSource(restaurants);
+      if (loading) {
+        setLoading(false);
+      }
     });
   };
 
@@ -73,11 +46,10 @@ const HomeScreen = ({ route, navigation }) => {
     return (
       <TouchableOpacity
         onPress={() => {
-          //console.log("running", photoUrl);
         }}
       >
         <View style={[styles.imageCard, styles.shadow]}>
-          <Image style={styles.thumbnail} source={{ uri: item.image }} />
+          <Image style={styles.thumbnail} source={{ uri: item.thumbnail }} />
           <View>
             <Text style={styles.restaurantTitle}>{item.name}</Text>
           </View>
@@ -87,15 +59,16 @@ const HomeScreen = ({ route, navigation }) => {
   };
 
   useEffect(() => {
-    getLocation();
     makeRemoteRequest();
   }, []);
 
   backButtonEffect = () => {
-    ToastAndroid.show("Press Back again to Exit", ToastAndroid.SHORT)
-    setBackClickCount(1)
-    setTimeout(function(){setBackClickCount(0)}, 1000)
-  }
+    ToastAndroid.show("Press Back again to Exit", ToastAndroid.SHORT);
+    setBackClickCount(1);
+    setTimeout(function() {
+      setBackClickCount(0);
+    }, 1000);
+  };
 
   handleBackButton = () => {
     backClickCount == 1 ? BackHandler.exitApp() : backButtonEffect();
@@ -107,7 +80,7 @@ const HomeScreen = ({ route, navigation }) => {
     return () => {
       BackHandler.removeEventListener("hardwareBackPress", handleBackButton);
     };
-  }, [handleBackButton]);   
+  }, [handleBackButton]);
 
   return (
     <View style={styles.container}>
@@ -122,38 +95,9 @@ const HomeScreen = ({ route, navigation }) => {
             }}
             source={require("../assets/images/doma.png")}
           />
-          {/* <TouchableOpacity
-            style={{
-              justifyContent: "center",
-              alignSelf: "center",
-              backgroundColor: "rgba(52, 52, 52, 0.5)",
-              marginRight: 20,
-              height: 68,
-              width: 68,
-              borderRadius: 34,
-              alignItems: "center"
-            }}
-          >
-            <View
-              style={{
-                justifyContent: "center",
-                alignContent: "center",
-                backgroundColor: "black",
-                width: 56,
-                height: 56,
-                borderRadius: 28,
-                overflow: "hidden"
-              }}
-            >
-              <Image
-                style={{ width: "100%", height: "100%" }}
-                source={{ uri: photoUrl }}
-              />
-            </View>
-          </TouchableOpacity> */}
         </View>
         <View style={[styles.vsPick, styles.shadow]}>
-          <Text>{address}</Text>
+          <Text>V's Pick</Text>
         </View>
         <View style={styles.titleContainer2}>
           <Text style={styles.pageTitle}>{"Around You"}</Text>
@@ -163,9 +107,9 @@ const HomeScreen = ({ route, navigation }) => {
             data={dataSource}
             renderItem={renderItem}
             keyExtractor={item => item.name}
-            initialNumToRender={3}
-            maxToRenderPerBatch={3}
-            scrollEnabled={scrollEnabled}
+            initialNumToRender={2}
+            maxToRenderPerBatch={2}
+            scrollEnabled={false}
             //onRefresh={this.handleRefresh}
             //refreshing={this.state.refreshing}
             //onEndReachedThreshold={10000000}

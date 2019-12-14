@@ -39,6 +39,7 @@ const HomeTabNavigator = () => {
         }
       })}
       tabBarOptions={{ showLabel: false, activeTintColor: '#FF4D12' }}
+      initialRouteName="Home"
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Search" component={SearchScreen} />

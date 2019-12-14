@@ -5,7 +5,7 @@ import {
     StyleSheet
 } from "react-native";
 
-const SearchScreen = (props) => (
+const SearchScreen = () => (
     <View style={styles.container}>
         <Text>SearchScreen</Text>
     </View>
