@@ -26,13 +26,14 @@ const LoadingScreen = ({ navigation }) => {
   };
   const signInWithFacebook = async () => {
     try {
+      await Facebook.initializeAsync("430112311029982");
       const {
         type,
         token,
         expires,
         permissions,
         declinedPermissions
-      } = await Facebook.logInWithReadPermissionsAsync("1376505772512509", {
+      } = await Facebook.logInWithReadPermissionsAsync("430112311029982", {
         permissions: ["public_profile", "email"]
       });
       if (type === "success") {
@@ -44,13 +45,13 @@ const LoadingScreen = ({ navigation }) => {
         var obj = JSON.parse(responseJSON);
         console.log(obj);
         //setHomescreen(true);
-        navigation.navigate("Home", {photoUrl: obj.picture.data.url});
+        navigation.navigate("Home", { photoUrl: obj.picture.data.url });
       } else {
         // type === 'cancel'
       }
     } catch ({ message }) {
       console.log(`Facebook 1 Error: ${message}`);
-      alert("first ${message}");
+      alert(`first ${message}`);
     }
   };
 
@@ -90,7 +91,9 @@ const LoadingScreen = ({ navigation }) => {
             .signInWithCredential(credential)
             .then(function() {
               //setHomescreen(true);
-              navigation.navigate("Home", { photoUrl: googleUser.user.photoUrl });
+              navigation.navigate("Home", {
+                photoUrl: googleUser.user.photoUrl
+              });
             })
             .catch(function(error) {
               // Handle Errors here.
@@ -139,7 +142,7 @@ const LoadingScreen = ({ navigation }) => {
   const checkIfLoggedIn = () => {
     if (firebase.auth().currentUser != null) {
       //setHomescreen(true);
-      console.log("The object is",firebase.auth().currentUser)
+      console.log("The object is", firebase.auth().currentUser);
       navigation.navigate("Home");
     } else {
       setHomescreen(false);
