@@ -8,10 +8,11 @@ import {
   Image,
   ScrollView,
   BackHandler,
-  ToastAndroid
+  ToastAndroid,
+  Button
 } from "react-native";
 import Constants from "expo-constants";
-import { firestore, storage } from "firebase";
+import firebase, { firestore, storage } from "firebase";
 
 //const MAP_API = "0abbbf5654f34e6dbb2606e6765f5614";
 
@@ -109,6 +110,10 @@ const HomeScreen = ({ route, navigation }) => {
     };
   }, [handleBackButton]);
 
+  onSignOut = () => {
+    firebase.auth().signOut()
+    navigation.navigate("Loading");
+  }
   return (
     <View style={styles.container}>
       <ScrollView style={{ flex: 1, width: "100%" }}>
@@ -124,7 +129,7 @@ const HomeScreen = ({ route, navigation }) => {
           />
         </View>
         <View style={[styles.vsPick, styles.shadow]}>
-          <Text>V's Pick</Text>
+          <Button onPress={() => onSignOut()} title={'sign out'}/>
         </View>
         <View style={styles.titleContainer2}>
           <Text style={styles.pageTitle}>{"Around You"}</Text>

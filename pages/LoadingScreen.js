@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   TouchableOpacity
 } from "react-native";
-import firebase, { googleProvider } from "../firebase";
+import firebase, { googleProvider, facebookProvider } from "../firebase";
 import * as Google from "expo-google-app-auth";
 import * as Facebook from "expo-facebook";
 import * as Font from "expo-font";
@@ -26,14 +26,14 @@ const LoadingScreen = ({ navigation }) => {
   };
   const signInWithFacebook = async () => {
     try {
-      await Facebook.initializeAsync("430112311029982");
+      await Facebook.initializeAsync("444233602924989");
       const {
         type,
         token,
         expires,
         permissions,
         declinedPermissions
-      } = await Facebook.logInWithReadPermissionsAsync("430112311029982", {
+      } = await Facebook.logInWithReadPermissionsAsync("444233602924989", {
         permissions: ["public_profile", "email"]
       });
       if (type === "success") {
@@ -43,9 +43,10 @@ const LoadingScreen = ({ navigation }) => {
         );
         const responseJSON = JSON.stringify(await response.json());
         var obj = JSON.parse(responseJSON);
-        console.log(obj);
-        //setHomescreen(true);
-        navigation.navigate("Home", { photoUrl: obj.picture.data.url });
+        const credential = facebookProvider.credential(token);
+        onSignInFB(credential);
+        console.log('credential:: ', credential)
+        // Sign in with the credential from the Facebook user.
       } else {
         // type === 'cancel'
       }
@@ -69,6 +70,33 @@ const LoadingScreen = ({ navigation }) => {
       }
     }
     return false;
+  };
+
+  const onSignInFB = credential => {
+    // if (firebase.auth().currentUser != null) {
+    //   console.log("The object is", firebase.auth().currentUser);
+    //   navigation.navigate("Home"); }
+    // else {console.log("unidentified user")}
+    console.log("credential's idtoken:::", credential.idToken);
+    console.log("current user", firebase.auth().currentUser)
+    firebase
+      .auth()
+      .signInWithCredential(credential)
+      .then(function() {
+        //setHomescreen(true);
+        navigation.navigate("Home");
+      })
+      .catch(function(error) {
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        // The email of the user's account used.
+        var email = error.email;
+        // The firebase.auth.AuthCredential type that was used.
+        var credential = error.credential;
+        // ...
+        console.log(error, errorCode);
+      });
   };
 
   const onSignIn = googleUser => {
