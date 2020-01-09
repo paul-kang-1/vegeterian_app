@@ -12,7 +12,7 @@ import {
   Button
 } from "react-native";
 import Constants from "expo-constants";
-import firebase, { firestore, storage } from "firebase";
+import firebase, { firestore } from "firebase";
 
 //const MAP_API = "0abbbf5654f34e6dbb2606e6765f5614";
 
@@ -22,32 +22,7 @@ const HomeScreen = ({ route, navigation }) => {
   const [loading, setLoading] = useState(true); // for data
   //const { photoUrl } = route.params;
   // Now we get the references of these images
-  const listurl = id => {
-    const storageRef = storage().ref(id);
-    return storageRef
-      .listAll()
-      .then(function(result) {
-        result.items.forEach(function(imageRef) {
-          // And finally display them
-          displayImage(imageRef);
-        });
-      })
-      .catch(function(error) {
-        // Handle any errors
-      });
-  };
 
-  function displayImage(imageRef) {
-    imageRef
-      .getDownloadURL()
-      .then(function(url) {
-        // TODO: Display the image on the UI
-        console.log(url);
-      })
-      .catch(function(error) {
-        // Handle any errors
-      });
-  }
   const makeRemoteRequest = () => {
     const ref = firestore().collection("restaurants");
     return ref.onSnapshot(querySnapshot => {
@@ -73,13 +48,32 @@ const HomeScreen = ({ route, navigation }) => {
     return (
       <TouchableOpacity
         onPress={() => {
-          listurl(item.id);
+          navigation.navigate("Restaurant", {
+            item: item
+          });
         }}
       >
         <View style={[styles.imageCard, styles.shadow]}>
           <Image style={styles.thumbnail} source={{ uri: item.thumbnail }} />
-          <View>
-            <Text style={styles.restaurantTitle}>{item.name}</Text>
+          <View
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
+          >
+            <View>
+              <Text style={styles.restaurantTitleText}>{item.name}</Text>
+              <View style={styles.restaurantKeywordContainer}>
+                {item.type.map((item, key) => (
+                  <View style={styles.restaurantKeyword}>
+                    <Text key={key} style={styles.restaurantKeywordText}>
+                      {" "}
+                      {item}{" "}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+            <View style={styles.restaurantRating}>
+              <Text style={styles.restaurantRatingText}>{item.rating}</Text>
+            </View>
           </View>
         </View>
       </TouchableOpacity>
@@ -91,11 +85,15 @@ const HomeScreen = ({ route, navigation }) => {
   }, []);
 
   backButtonEffect = () => {
-    ToastAndroid.show("Press Back again to Exit", ToastAndroid.SHORT);
-    setBackClickCount(1);
-    setTimeout(function() {
-      setBackClickCount(0);
-    }, 1000);
+    if (navigation.isFocused()) {
+      ToastAndroid.show("Press Back again to Exit", ToastAndroid.SHORT);
+      setBackClickCount(1);
+      setTimeout(function() {
+        setBackClickCount(0);
+      }, 1000);
+    } else {
+      navigation.goBack()
+    }
   };
 
   handleBackButton = () => {
@@ -111,11 +109,11 @@ const HomeScreen = ({ route, navigation }) => {
   }, [handleBackButton]);
 
   onSignOut = () => {
-    firebase.auth().signOut()
+    firebase.auth().signOut();
     navigation.navigate("Loading");
-  }
+  };
   return (
-    <View style={styles.container}>
+    <View style={styles.screenContainer}>
       <ScrollView style={{ flex: 1, width: "100%" }}>
         <View style={styles.titleContainer}>
           <Text style={styles.pageTitle}>{"V's Pick"}</Text>
@@ -129,7 +127,7 @@ const HomeScreen = ({ route, navigation }) => {
           />
         </View>
         <View style={[styles.vsPick, styles.shadow]}>
-          <Button onPress={() => onSignOut()} title={'sign out'}/>
+          <Button onPress={() => onSignOut()} title={"sign out"} />
         </View>
         <View style={styles.titleContainer2}>
           <Text style={styles.pageTitle}>{"Around You"}</Text>
@@ -211,17 +209,47 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     overflow: "hidden"
   },
-  container: {
+  screenContainer: {
     flex: 1,
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#EAEAE8"
   },
-  restaurantTitle: {
+  restaurantRatingText: {
+    fontSize: 25,
+    fontFamily: "OpenSans-SemiBold",
+    color: "#FF4D12"
+  },
+  restaurantTitleText: {
     fontSize: 20,
     fontFamily: "OpenSans-SemiBold",
-    paddingVertical: 10,
+    paddingTop: 10,
+    paddingBottom: 5,
     marginLeft: 10
+  },
+  restaurantKeywordText: {
+    fontSize: 12,
+    fontFamily: "OpenSans-Regular"
+  },
+  restaurantKeywordContainer: {
+    flexDirection: "row",
+    marginBottom: 10
+  },
+  restaurantKeyword: {
+    backgroundColor: "#E1E1E1",
+    marginLeft: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 15
+  },
+  restaurantRating: {
+    // backgroundColor: "#FF4D12",
+    // borderColor: "#C53809",
+    // borderWidth: 2,
+    borderRadius: 15,
+    paddingHorizontal: 15,
+    marginRight: 10,
+    marginVertical: 20
   }
 });
