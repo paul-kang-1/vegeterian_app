@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import Constants from "expo-constants";
 import firebase, { firestore } from "firebase";
+import Keyword from './Keyword'
 
 //const MAP_API = "0abbbf5654f34e6dbb2606e6765f5614";
 
@@ -20,11 +21,11 @@ const HomeScreen = ({ route, navigation }) => {
   const [dataSource, setDataSource] = useState([]);
   const [backClickCount, setBackClickCount] = useState(0);
   const [loading, setLoading] = useState(true); // for data
+  const ref = firestore().collection("restaurants");
   //const { photoUrl } = route.params;
   // Now we get the references of these images
 
   const makeRemoteRequest = () => {
-    const ref = firestore().collection("restaurants");
     return ref.onSnapshot(querySnapshot => {
       const restaurants = [];
       querySnapshot.forEach(doc => {
@@ -49,27 +50,19 @@ const HomeScreen = ({ route, navigation }) => {
       <TouchableOpacity
         onPress={() => {
           navigation.navigate("Restaurant", {
-            item: item
+            id: item.id,
+            ref: ref
           });
         }}
       >
         <View style={[styles.imageCard, styles.shadow]}>
           <Image style={styles.thumbnail} source={{ uri: item.thumbnail }} />
           <View
-            style={{ flexDirection: "row", justifyContent: "space-between" }}
+            style={{ flexDirection: "row", justifyContent: "space-between", marginLeft:10 }}
           >
             <View>
               <Text style={styles.restaurantTitleText}>{item.name}</Text>
-              <View style={styles.restaurantKeywordContainer}>
-                {item.type.map((item, key) => (
-                  <View style={styles.restaurantKeyword}>
-                    <Text key={key} style={styles.restaurantKeywordText}>
-                      {" "}
-                      {item}{" "}
-                    </Text>
-                  </View>
-                ))}
-              </View>
+              <Keyword keywords={item.type}/>
             </View>
             <View style={styles.restaurantRating}>
               <Text style={styles.restaurantRatingText}>{item.rating}</Text>
@@ -92,7 +85,8 @@ const HomeScreen = ({ route, navigation }) => {
         setBackClickCount(0);
       }, 1000);
     } else {
-      navigation.goBack()
+      console.log("go Back")
+      navigation.pop()
     }
   };
 
@@ -218,7 +212,7 @@ const styles = StyleSheet.create({
   },
   restaurantRatingText: {
     fontSize: 25,
-    fontFamily: "OpenSans-SemiBold",
+    fontFamily: "OpenSans-Bold",
     color: "#FF4D12"
   },
   restaurantTitleText: {
@@ -226,22 +220,7 @@ const styles = StyleSheet.create({
     fontFamily: "OpenSans-SemiBold",
     paddingTop: 10,
     paddingBottom: 5,
-    marginLeft: 10
-  },
-  restaurantKeywordText: {
-    fontSize: 12,
-    fontFamily: "OpenSans-Regular"
-  },
-  restaurantKeywordContainer: {
-    flexDirection: "row",
-    marginBottom: 10
-  },
-  restaurantKeyword: {
-    backgroundColor: "#E1E1E1",
-    marginLeft: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 15
+
   },
   restaurantRating: {
     // backgroundColor: "#FF4D12",
