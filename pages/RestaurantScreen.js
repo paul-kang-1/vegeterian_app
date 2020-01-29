@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Linking
 } from "react-native";
+import MapView from "react-native-maps";
 import BGCarousel, { DEVICE_WIDTH, DEVICE_HEIGHT } from "./BGCarousel";
 import Constants from "expo-constants";
 import StarRating from "react-native-star-rating";
@@ -95,6 +96,7 @@ const RestaurantScreen = ({ navigation, route }) => {
                   bottom: 0,
                   padding: 10
                 }}
+                onPress={() => console.log(dataSource.coordinates._lat)}
               >
                 <Image
                   source={require("../assets/icons/button_WriteReview.png")}
@@ -176,10 +178,33 @@ const RestaurantScreen = ({ navigation, route }) => {
                 }}
               >
                 <Keyword keywords={dataSource.type} />
+                <MapView
+                  style={{
+                    height: 200,
+                    width: "100%",
+                    marginVertical: 10,
+                    marginTop: 0
+                  }}
+                  initialRegion={{
+                    latitude: dataSource.coordinates._lat,
+                    longitude: dataSource.coordinates._long,
+                    latitudeDelta: 0.0022,
+                    longitudeDelta: 0.0221
+                  }}
+                >
+                  <MapView.Marker
+                    coordinate={{
+                      latitude: dataSource.coordinates._lat,
+                      longitude: dataSource.coordinates._long
+                    }}
+                    title={"title"}
+                    description={"description"}
+                  />
+                </MapView>
                 <Text
                   style={{
                     fontFamily: "OpenSans-Regular",
-                    fontSize: 12,
+                    fontSize: 15,
                     alignSelf: "center"
                   }}
                 >
@@ -187,9 +212,22 @@ const RestaurantScreen = ({ navigation, route }) => {
                 </Text>
                 <TouchableOpacity
                   onPress={() => Linking.openURL(`tel:${dataSource.phone}`)}
+                  style={styles.callButton}
                 >
-                  <Text>BRB</Text>
+                  <Image
+                    source={require("../assets/icons/phone.png")}
+                    style={{ width: 20, height: 20, marginRight: 15 }}
+                    resizeMode="contain"
+                  />
+                  <Text
+                    style={{ fontFamily: "OpenSans-Regular", fontSize: 15 }}
+                  >
+                    Make a Phone Call
+                  </Text>
                 </TouchableOpacity>
+                <Text style={{ fontFamily: "OpenSans-Bold", fontSize: 20 }}>
+                  Open Hours
+                </Text>
               </View>
             </View>
           </View>
@@ -249,5 +287,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 5,
     marginLeft: 5
+  },
+  callButton: {
+    width: "100%",
+    borderColor: "red",
+    borderWidth: 1,
+    marginVertical: 15,
+    padding: 15,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center"
   }
 });
