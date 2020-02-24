@@ -26,35 +26,65 @@ const LoadingScreen = ({ navigation }) => {
     setLogin(true);
   };
   const signInWithFacebook = async () => {
-    try {
-      await Facebook.initializeAsync("444233602924989");
-      const {
-        type,
-        token,
-        expires,
-        permissions,
-        declinedPermissions
-      } = await Facebook.logInWithReadPermissionsAsync("444233602924989", {
-        permissions: ["public_profile", "email"]
-      });
-      if (type === "success") {
-        // Get the user's name using Facebook's Graph API
-        const response = await fetch(
-          `https://graph.facebook.com/me?access_token=${token}&fields=id,name,email,about,picture`
-        );
-        const responseJSON = JSON.stringify(await response.json());
-        var obj = JSON.parse(responseJSON);
-        const credential = facebookProvider.credential(token);
-        onSignInFB(credential);
-        console.log('credential:: ', credential)
-        // Sign in with the credential from the Facebook user.
-      } else {
-        // type === 'cancel'
-      }
-    } catch ({ message }) {
-      console.log(`Facebook 1 Error: ${message}`);
-      alert(`first ${message}`);
+    Facebook.initializeAsync("199623754607347");
+    const {
+      type,
+      token
+    } = await Facebook.logInWithReadPermissionsAsync("199623754607347" ,{
+      permissions: ['email', 'public_profile']
+    });
+    if (type === "success") {
+      console.log(token);
+      const credential = firebase.auth.FacebookAuthProvider.credntial(token);
+      // const credential = facebookProvider.credential(token);
+      firebase
+        .auth()
+        .signInWithCredential(credential)
+        .then(function() {
+          //setHomescreen(true);
+          navigation.navigate("Home");
+        })
+        .catch(function(error) {
+          // Handle Errors here.
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          // The email of the user's account used.
+          var email = error.email;
+          // The firebase.auth.AuthCredential type that was used.
+          //var credential = error.credential;
+          // ...
+          console.log(error, errorCode);
+        });
     }
+    // try {
+    //   await Facebook.initializeAsync("444233602924989");
+    //   const {
+    //     type,
+    //     token,
+    //     expires,
+    //     permissions,
+    //     declinedPermissions
+    //   } = await Facebook.logInWithReadPermissionsAsync("444233602924989", {
+    //     permissions: ["public_profile", "email"]
+    //   });
+    //   if (type === "success") {
+    //     // Get the user's name using Facebook's Graph API
+    //     const response = await fetch(
+    //       `https://graph.facebook.com/me?access_token=${token}&fields=id,name,email,about,picture`
+    //     );
+    //     const responseJSON = JSON.stringify(await response.json());
+    //     var obj = JSON.parse(responseJSON);
+    //     const credential = facebookProvider.credential(token);
+    //     onSignInFB(credential);
+    //     console.log('credential:: ', credential)
+    //     // Sign in with the credential from the Facebook user.
+    //   } else {
+    //     // type === 'cancel'
+    //   }
+    // } catch ({ message }) {
+    //   console.log(`Facebook 1 Error: ${message}`);
+    //   alert(`first ${message}`);
+    // }
   };
 
   const isUserEqual = (googleUser, firebaseUser) => {
@@ -73,32 +103,28 @@ const LoadingScreen = ({ navigation }) => {
     return false;
   };
 
-  const onSignInFB = credential => {
-    // if (firebase.auth().currentUser != null) {
-    //   console.log("The object is", firebase.auth().currentUser);
-    //   navigation.navigate("Home"); }
-    // else {console.log("unidentified user")}
-    console.log("credential's idtoken:::", credential.idToken);
-    console.log("current user", firebase.auth().currentUser)
-    firebase
-      .auth()
-      .signInWithCredential(credential)
-      .then(function() {
-        //setHomescreen(true);
-        navigation.navigate("Home");
-      })
-      .catch(function(error) {
-        // Handle Errors here.
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        // The email of the user's account used.
-        var email = error.email;
-        // The firebase.auth.AuthCredential type that was used.
-        //var credential = error.credential;
-        // ...
-        console.log(error, errorCode);
-      });
-  };
+  // const onSignInFB = credential => {
+  //   console.log("credential's idtoken:::", credential.idToken);
+  //   console.log("current user", firebase.auth().currentUser)
+  //   firebase
+  //     .auth()
+  //     .signInWithCredential(credential)
+  //     .then(function() {
+  //       //setHomescreen(true);
+  //       navigation.navigate("Home");
+  //     })
+  //     .catch(function(error) {
+  //       // Handle Errors here.
+  //       var errorCode = error.code;
+  //       var errorMessage = error.message;
+  //       // The email of the user's account used.
+  //       var email = error.email;
+  //       // The firebase.auth.AuthCredential type that was used.
+  //       //var credential = error.credential;
+  //       // ...
+  //       console.log(error, errorCode);
+  //     });
+  // };
 
   const onSignIn = googleUser => {
     //console.log('Google Auth Response', googleUser);
