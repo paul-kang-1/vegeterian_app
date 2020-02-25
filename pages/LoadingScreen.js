@@ -7,12 +7,14 @@ import {
   ActivityIndicator,
   TouchableOpacity
 } from "react-native";
-import firebase, { googleProvider, facebookProvider } from "../firebase";
+import * as firebase from 'firebase';
 import * as Google from "expo-google-app-auth";
 import * as Facebook from "expo-facebook";
 import * as Font from "expo-font";
+import '../firebase'
 
 const LoadingScreen = ({ navigation }) => {
+  const googleProvider = new firebase.auth.GoogleAuthProvider;
   const [showLogin, setLogin] = useState(false);
   const [toHomeScreen, setHomescreen] = useState(false);
   const loadFonts = async () => {
@@ -25,6 +27,16 @@ const LoadingScreen = ({ navigation }) => {
     });
     setLogin(true);
   };
+
+  // Listen for authentication state to change.
+  firebase.auth().onAuthStateChanged((user) => {
+    if (user != null) {
+      console.log("We are authenticated now!");
+    }
+
+    // Do other things
+  });
+
   const signInWithFacebook = async () => {
     Facebook.initializeAsync("199623754607347");
     const {
@@ -35,7 +47,7 @@ const LoadingScreen = ({ navigation }) => {
     });
     if (type === "success") {
       console.log(token);
-      const credential = firebase.auth.FacebookAuthProvider.credntial(token);
+      const credential = firebase.auth.FacebookAuthProvider.credential(token)
       // const credential = facebookProvider.credential(token);
       firebase
         .auth()
@@ -56,35 +68,6 @@ const LoadingScreen = ({ navigation }) => {
           console.log(error, errorCode);
         });
     }
-    // try {
-    //   await Facebook.initializeAsync("444233602924989");
-    //   const {
-    //     type,
-    //     token,
-    //     expires,
-    //     permissions,
-    //     declinedPermissions
-    //   } = await Facebook.logInWithReadPermissionsAsync("444233602924989", {
-    //     permissions: ["public_profile", "email"]
-    //   });
-    //   if (type === "success") {
-    //     // Get the user's name using Facebook's Graph API
-    //     const response = await fetch(
-    //       `https://graph.facebook.com/me?access_token=${token}&fields=id,name,email,about,picture`
-    //     );
-    //     const responseJSON = JSON.stringify(await response.json());
-    //     var obj = JSON.parse(responseJSON);
-    //     const credential = facebookProvider.credential(token);
-    //     onSignInFB(credential);
-    //     console.log('credential:: ', credential)
-    //     // Sign in with the credential from the Facebook user.
-    //   } else {
-    //     // type === 'cancel'
-    //   }
-    // } catch ({ message }) {
-    //   console.log(`Facebook 1 Error: ${message}`);
-    //   alert(`first ${message}`);
-    // }
   };
 
   const isUserEqual = (googleUser, firebaseUser) => {
@@ -102,29 +85,6 @@ const LoadingScreen = ({ navigation }) => {
     }
     return false;
   };
-
-  // const onSignInFB = credential => {
-  //   console.log("credential's idtoken:::", credential.idToken);
-  //   console.log("current user", firebase.auth().currentUser)
-  //   firebase
-  //     .auth()
-  //     .signInWithCredential(credential)
-  //     .then(function() {
-  //       //setHomescreen(true);
-  //       navigation.navigate("Home");
-  //     })
-  //     .catch(function(error) {
-  //       // Handle Errors here.
-  //       var errorCode = error.code;
-  //       var errorMessage = error.message;
-  //       // The email of the user's account used.
-  //       var email = error.email;
-  //       // The firebase.auth.AuthCredential type that was used.
-  //       //var credential = error.credential;
-  //       // ...
-  //       console.log(error, errorCode);
-  //     });
-  // };
 
   const onSignIn = googleUser => {
     //console.log('Google Auth Response', googleUser);
