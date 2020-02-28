@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import Constants from "expo-constants";
 import firebase, { firestore } from "firebase";
-import Keyword from './Keyword'
+import Keyword from "./Keyword";
 
 //const MAP_API = "0abbbf5654f34e6dbb2606e6765f5614";
 
@@ -29,13 +29,14 @@ const HomeScreen = ({ route, navigation }) => {
     return ref.onSnapshot(querySnapshot => {
       const restaurants = [];
       querySnapshot.forEach(doc => {
-        const { name, rating, type, thumbnail } = doc.data();
+        const { name, rating, type, thumbnail, address } = doc.data();
         restaurants.push({
           id: doc.id,
           name,
           rating,
           type,
-          thumbnail
+          thumbnail,
+          address
         });
       });
       setDataSource(restaurants);
@@ -57,15 +58,30 @@ const HomeScreen = ({ route, navigation }) => {
       >
         <View style={[styles.imageCard, styles.shadow]}>
           <Image style={styles.thumbnail} source={{ uri: item.thumbnail }} />
+          <View style={{ position: "absolute", marginTop: 10, right: 5 }}>
+            <Keyword keywords={item.type} />
+          </View>
           <View
-            style={{ flexDirection: "row", justifyContent: "space-between", marginLeft:10 }}
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              marginLeft: 10
+            }}
           >
             <View>
               <Text style={styles.restaurantTitleText}>{item.name}</Text>
-              <Keyword keywords={item.type}/>
+              <Text>{item.address.address_depth2}</Text>
             </View>
-            <View style={styles.restaurantRating}>
-              <Text style={styles.restaurantRatingText}>{item.rating}</Text>
+            <View style={{flexDirection:'row'}}>
+              <View style={{ width: 25, height: 25, marginTop: 19, marginRight: 10 }}>
+                <Image
+                  style={{ width: "100%", height: "100%" }}
+                  source={require("../assets/icons/heart.png")}
+                />
+              </View>
+              <View style={[styles.restaurantRating, styles.shadow]}>
+                <Text style={styles.restaurantRatingText}>{item.rating}</Text>
+              </View>
             </View>
           </View>
         </View>
@@ -85,8 +101,8 @@ const HomeScreen = ({ route, navigation }) => {
         setBackClickCount(0);
       }, 1000);
     } else {
-      console.log("go Back")
-      navigation.pop()
+      console.log("go Back");
+      navigation.pop();
     }
   };
 
@@ -103,28 +119,29 @@ const HomeScreen = ({ route, navigation }) => {
   }, [handleBackButton]);
 
   onSignOut = () => {
-    firebase.auth().signOut();
-    navigation.navigate("Loading");
+    // firebase.auth().signOut();
+    // navigation.navigate("Loading");
   };
+
+  // onMerge = () => {
+  //   console.log(firebase.auth().currentUser)
+  // };
+
   return (
     <View style={styles.screenContainer}>
       <ScrollView style={{ flex: 1, width: "100%" }}>
         <View style={styles.titleContainer}>
-          <Text style={styles.pageTitle}>{"V's Pick"}</Text>
-          <Image
-            style={{
-              position: "absolute",
-              right: 0,
-              top: 0
-            }}
-            source={require("../assets/images/doma.png")}
-          />
+          <Text style={styles.pageTitle}>
+            <Text style={{ color: "#FF4D12" }}>V</Text>'s Pick
+          </Text>
         </View>
         <View style={[styles.vsPick, styles.shadow]}>
-          <Button onPress={() => onSignOut()} title={"sign out"} />
+          <Button onPress={() => onSignOut()} title={"Merge Account"} />
         </View>
         <View style={styles.titleContainer2}>
-          <Text style={styles.pageTitle}>{"Around You"}</Text>
+          <Text style={styles.pageTitle}>
+            <Text style={{ color: "#FF4D12" }}>A</Text>round You
+          </Text>
         </View>
         <View style={{ height: "100%" }}>
           <FlatList
@@ -156,9 +173,9 @@ const elevationShadowStyle = elevation => {
 };
 
 const styles = StyleSheet.create({
-  shadow: elevationShadowStyle(4),
+  shadow: elevationShadowStyle(6),
   vsPick: {
-    height: 320,
+    height: 300,
     marginHorizontal: 15,
     paddingHorizontal: 10,
     paddingBottom: 10,
@@ -167,11 +184,10 @@ const styles = StyleSheet.create({
     borderRadius: 8
   },
   titleContainer: {
-    height: 123,
+    height: 100,
     flexDirection: "row",
     width: "100%",
     justifyContent: "space-between",
-    paddingTop: Constants.statusBarHeight,
     paddingLeft: 20
   },
   titleContainer2: {
@@ -183,10 +199,10 @@ const styles = StyleSheet.create({
     paddingLeft: 20
   },
   pageTitle: {
-    fontFamily: "El-Messiri-SemiBold",
-    fontSize: 45,
-    alignSelf: "flex-end"
-    //marginBottom:10
+    fontFamily: "Roboto-Light",
+    fontSize: 40,
+    alignSelf: "flex-end",
+    marginBottom: 5
   },
   thumbnail: {
     //flex: 1,
@@ -196,7 +212,7 @@ const styles = StyleSheet.create({
   },
   imageCard: {
     flex: 1,
-    height: 250,
+    height: 235,
     marginHorizontal: 15,
     marginBottom: 20,
     backgroundColor: "white",
@@ -208,27 +224,26 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#EAEAE8"
+    backgroundColor: "white",
+    marginTop: Constants.statusBarHeight
   },
   restaurantRatingText: {
-    fontSize: 25,
-    fontFamily: "OpenSans-Bold",
-    color: "#FF4D12"
+    fontSize: 20,
+    fontFamily: "Roboto-Medium",
+    color: "#FFF"
   },
   restaurantTitleText: {
     fontSize: 20,
-    fontFamily: "OpenSans-SemiBold",
-    paddingTop: 10,
-    paddingBottom: 5,
-
+    fontFamily: "Roboto-Medium",
+    paddingTop: 5,
+    paddingBottom: 2
   },
   restaurantRating: {
-    // backgroundColor: "#FF4D12",
-    // borderColor: "#C53809",
-    // borderWidth: 2,
-    borderRadius: 15,
+    backgroundColor: "#FF4D12",
+    borderRadius: 20,
     paddingHorizontal: 15,
     marginRight: 10,
-    marginVertical: 20
+    marginVertical: 15,
+    paddingTop: 2
   }
 });

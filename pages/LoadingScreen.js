@@ -11,19 +11,20 @@ import * as firebase from 'firebase';
 import * as Google from "expo-google-app-auth";
 import * as Facebook from "expo-facebook";
 import * as Font from "expo-font";
-import '../firebase'
+import '../firebase' 
 
 const LoadingScreen = ({ navigation }) => {
   const googleProvider = new firebase.auth.GoogleAuthProvider;
   const [showLogin, setLogin] = useState(false);
-  const [toHomeScreen, setHomescreen] = useState(false);
   const loadFonts = async () => {
     await Font.loadAsync({
       "AlegreyaSans-Regular": require("../assets/fonts/AlegreyaSans-Regular.ttf"),
       "OpenSans-SemiBold": require("../assets/fonts/OpenSans-SemiBold.ttf"),
       "OpenSans-Bold": require("../assets/fonts/OpenSans-Bold.ttf"),
       "OpenSans-Regular": require("../assets/fonts/OpenSans-Regular.ttf"),
-      "El-Messiri-SemiBold": require("../assets/fonts/ElMessiri-SemiBold.ttf")
+      "El-Messiri-SemiBold": require("../assets/fonts/ElMessiri-SemiBold.ttf"),
+      "Roboto-Light": require("../assets/fonts/Roboto-Light.ttf"),
+      "Roboto-Medium": require("../assets/fonts/Roboto-Medium.ttf")
     });
     setLogin(true);
   };
@@ -32,8 +33,8 @@ const LoadingScreen = ({ navigation }) => {
   firebase.auth().onAuthStateChanged((user) => {
     if (user != null) {
       console.log("We are authenticated now!");
+      navigation.navigate("Home");
     }
-
     // Do other things
   });
 
@@ -42,30 +43,29 @@ const LoadingScreen = ({ navigation }) => {
     const {
       type,
       token
-    } = await Facebook.logInWithReadPermissionsAsync("199623754607347" ,{
+    } = await Facebook.logInWithReadPermissionsAsync("199623754607347", {
       permissions: ['email', 'public_profile']
     });
     if (type === "success") {
-      console.log(token);
       const credential = firebase.auth.FacebookAuthProvider.credential(token)
-      // const credential = facebookProvider.credential(token);
+      //console.log(credential)
       firebase
         .auth()
         .signInWithCredential(credential)
-        .then(function() {
-          //setHomescreen(true);
+        .then(function () {
           navigation.navigate("Home");
         })
-        .catch(function(error) {
+        .catch(function (error) {
           // Handle Errors here.
-          var errorCode = error.code;
-          var errorMessage = error.message;
+          let errorCode = error.code;
+          let errorMessage = error.message;
           // The email of the user's account used.
-          var email = error.email;
+          let email = error.email;
           // The firebase.auth.AuthCredential type that was used.
-          //var credential = error.credential;
-          // ...
-          console.log(error, errorCode);
+          let credential = error.credential;
+          if (error.code == 'auth/account-exists-with-different-credential') {
+
+          }
         });
     }
   };
@@ -91,7 +91,7 @@ const LoadingScreen = ({ navigation }) => {
     // We need to register an Observer on Firebase Auth to make sure auth is initialized.
     var unsubscribe = firebase
       .auth()
-      .onAuthStateChanged(function(firebaseUser) {
+      .onAuthStateChanged(function (firebaseUser) {
         unsubscribe();
         // Check if we are already signed-in Firebase with the correct user.
         if (!isUserEqual(googleUser, firebaseUser)) {
@@ -104,13 +104,10 @@ const LoadingScreen = ({ navigation }) => {
           firebase
             .auth()
             .signInWithCredential(credential)
-            .then(function() {
-              //setHomescreen(true);
-              navigation.navigate("Home", {
-                photoUrl: googleUser.user.photoUrl
-              });
+            .then(function () {
+              navigation.navigate("Home");
             })
-            .catch(function(error) {
+            .catch(function (error) {
               // Handle Errors here.
               var errorCode = error.code;
               var errorMessage = error.message;
@@ -156,11 +153,10 @@ const LoadingScreen = ({ navigation }) => {
 
   const checkIfLoggedIn = () => {
     if (firebase.auth().currentUser != null) {
-      //setHomescreen(true);
       console.log("The object is", firebase.auth().currentUser);
       navigation.navigate("Home");
     } else {
-      setHomescreen(false);
+      // setHomescreen(false);
     }
   };
 
@@ -211,13 +207,13 @@ const LoadingScreen = ({ navigation }) => {
           </View>
         </React.Fragment>
       ) : (
-        <React.Fragment>
-          <View style={{ flex: 1 }} />
-          <View style={{ flex: 1, justifyContent: "center" }}>
-            <ActivityIndicator size="large" />
-          </View>
-        </React.Fragment>
-      )}
+          <React.Fragment>
+            <View style={{ flex: 1 }} />
+            <View style={{ flex: 1, justifyContent: "center" }}>
+              <ActivityIndicator size="large" />
+            </View>
+          </React.Fragment>
+        )}
     </View>
   );
 };

@@ -23,7 +23,7 @@ export default Keyword;
 const styles = StyleSheet.create({
   restaurantKeywordText: {
     fontSize: 12,
-    fontFamily: "OpenSans-Regular"
+    fontFamily: "Roboto-Medium"
   },
   restaurantKeywordContainer: {
     flexDirection: "row",
