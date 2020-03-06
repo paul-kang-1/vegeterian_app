@@ -40,43 +40,43 @@ const RestaurantScreen = ({ navigation, route }) => {
       ]
     : [];
 
-  const ratingModule = (icons, rating) => {
-    const res = [];
-    for (var i = 0; i < icons.length; i++) {
-      res.push(
-        <View style={{ flexDirection: "row", marginTop: 5 }}>
-          <Image
-            style={{ width: 18, height: 20, marginRight: 5 }}
-            source={icons[i]}
-            resizeMode="contain"
-          />
-          <StarRating
-            disabled={true}
-            maxStars={5}
-            rating={rating[i]}
-            emptyStar={"star-o"}
-            emptyStarColor="#ADADAD"
-            fullStar={"star"}
-            fullStarColor="#FF4D12"
-            halfStarEnabled={false}
-            starStyle={{ marginLeft: 3 }}
-            starSize={18}
-          />
-          <Text
-            style={{
-              marginLeft: 5,
-              fontFamily: "OpenSans-SemiBold",
-              fontSize: 14,
-              color: "#ADADAD"
-            }}
-          >
-            {rating[i]}
-          </Text>
-        </View>
-      );
-    }
-    return res;
-  };
+  // const ratingModule = (icons, rating) => {
+  //   const res = [];
+  //   for (var i = 0; i < icons.length; i++) {
+  //     res.push(
+  //       <View style={{ flexDirection: "row", marginTop: 5 }} >
+  //         <Image
+  //           style={{ width: 18, height: 20, marginRight: 5 }}
+  //           source={icons[i]}
+  //           resizeMode="contain"
+  //         />
+  //         <StarRating
+  //           disabled={true}
+  //           maxStars={5}
+  //           rating={rating[i]}
+  //           emptyStar={"star-o"}
+  //           emptyStarColor="#ADADAD"
+  //           fullStar={"star"}
+  //           fullStarColor="#FF4D12"
+  //           halfStarEnabled={false}
+  //           starStyle={{ marginLeft: 3 }}
+  //           starSize={18}
+  //         />
+  //         <Text
+  //           style={{
+  //             marginLeft: 5,
+  //             fontFamily: "OpenSans-SemiBold",
+  //             fontSize: 14,
+  //             color: "#ADADAD"
+  //           }}
+  //         >
+  //           {rating[i]}
+  //         </Text>
+  //       </View>
+  //     );
+  //   }
+  //   return res;
+  // };
 
   useEffect(() => {
     fetchAdditionalInfo(id);
@@ -139,7 +139,7 @@ const RestaurantScreen = ({ navigation, route }) => {
                   <Text style={styles.restaurantTitleText}>
                     {dataSource.name}
                   </Text>
-                  <View style={styles.statusContainer}>
+                  {/* <View style={styles.statusContainer}>
                     <Image
                       style={[styles.statusIcon, { marginBottom: 2 }]}
                       source={require("../assets/icons/viewIcon.png")}
@@ -158,21 +158,21 @@ const RestaurantScreen = ({ navigation, route }) => {
                       resizeMode="contain"
                     />
                     <Text style={styles.statusText}>100</Text>
-                  </View>
+                  </View> */}
                 </View>
                 <Text style={styles.restaurantRatingText}>
                   {dataSource.rating}
                 </Text>
               </View>
-              <View style={{ alignSelf: "flex-end", marginRight: 20 }}>
+              {/* <View style={{ alignSelf: "flex-end", marginRight: 20 }}>
                 {ratingModule(icons, rating)}
-              </View>
+              </View> */}
               <View
                 style={{
                   borderTopColor: "#C4C4C4",
                   borderTopWidth: 1,
                   margin: 10,
-                  marginTop: 15,
+                  marginTop: 10,
                   paddingTop: 10,
                   paddingHorizontal: 5
                 }}
@@ -261,17 +261,17 @@ const styles = StyleSheet.create({
     width: "100%"
   },
   restaurantTitleText: {
-    fontSize: 25,
-    fontFamily: "OpenSans-SemiBold",
+    fontSize: 35,
+    fontFamily: "Roboto-Light",
     paddingTop: 10,
-    paddingBottom: 5,
     marginLeft: 12
   },
   restaurantRatingText: {
     alignSelf: "center",
     marginRight: 15,
-    fontSize: 35,
-    fontFamily: "OpenSans-SemiBold",
+    marginTop: 10,
+    fontSize: 40,
+    fontFamily: "Roboto-Medium",
     color: "#FF4D12"
   },
   statusText: {

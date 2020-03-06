@@ -123,13 +123,9 @@ const HomeScreen = ({ route, navigation }) => {
     // navigation.navigate("Loading");
   };
 
-  // onMerge = () => {
-  //   console.log(firebase.auth().currentUser)
-  // };
-
-  return (
-    <View style={styles.screenContainer}>
-      <ScrollView style={{ flex: 1, width: "100%" }}>
+  const listHeader = () => {
+    return (
+      <View>
         <View style={styles.titleContainer}>
           <Text style={styles.pageTitle}>
             <Text style={{ color: "#FF4D12" }}>V</Text>'s Pick
@@ -143,21 +139,24 @@ const HomeScreen = ({ route, navigation }) => {
             <Text style={{ color: "#FF4D12" }}>A</Text>round You
           </Text>
         </View>
-        <View style={{ height: "100%" }}>
-          <FlatList
-            data={dataSource}
-            renderItem={renderItem}
-            keyExtractor={item => item.name}
-            initialNumToRender={2}
-            maxToRenderPerBatch={2}
-            scrollEnabled={false}
-            //onRefresh={this.handleRefresh}
-            //refreshing={this.state.refreshing}
-            //onEndReachedThreshold={10000000}
-          />
-        </View>
-      </ScrollView>
-    </View>
+      </View>
+    );
+  }
+
+  return (
+    <FlatList
+      data={dataSource}
+      renderItem={renderItem}
+      keyExtractor={item => item.name}
+      // initialNumToRender={2}
+      // maxToRenderPerBatch={2}
+      scrollEnabled={true}
+      ListHeaderComponent={listHeader()}
+      showsVerticalScrollIndicator={false}
+      //onRefresh={this.handleRefresh}
+      //refreshing={this.state.refreshing}
+      //onEndReachedThreshold={10000000}
+    />
   );
 };
 export default HomeScreen;
@@ -188,7 +187,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     width: "100%",
     justifyContent: "space-between",
-    paddingLeft: 20
+    paddingLeft: 20,
+    marginTop: 10
   },
   titleContainer2: {
     flex: 0,

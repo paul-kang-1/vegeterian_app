@@ -35,8 +35,10 @@ class BGCarousel extends React.Component {
             <Image
               source={{ uri: item }}
               style={{ height: "100%", width: DEVICE_WIDTH}}
+              key={{item}}
             />
           )}
+          keyExtractor={(images, index)=> index.toString()}
         />
         <View style={styles.circleDiv}>
           {images.map((image, i) => (

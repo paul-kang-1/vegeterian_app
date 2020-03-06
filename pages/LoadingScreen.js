@@ -5,7 +5,8 @@ import {
   View,
   Image,
   ActivityIndicator,
-  TouchableOpacity
+  TouchableOpacity,
+  Alert
 } from "react-native";
 import * as firebase from 'firebase';
 import * as Google from "expo-google-app-auth";
@@ -16,6 +17,7 @@ import '../firebase'
 const LoadingScreen = ({ navigation }) => {
   const googleProvider = new firebase.auth.GoogleAuthProvider;
   const [showLogin, setLogin] = useState(false);
+  // const [isLoading, setLoading] = useState(true);
   const loadFonts = async () => {
     await Font.loadAsync({
       "AlegreyaSans-Regular": require("../assets/fonts/AlegreyaSans-Regular.ttf"),
@@ -28,14 +30,17 @@ const LoadingScreen = ({ navigation }) => {
     });
     setLogin(true);
   };
-
+  // Flag to disregard the initial registration call
+  let authFlag = true;
   // Listen for authentication state to change.
   firebase.auth().onAuthStateChanged((user) => {
-    if (user != null) {
-      console.log("We are authenticated now!");
-      navigation.navigate("Home");
-    }
-    // Do other things
+    // if(authFlag){
+    //   console.log("initial call")
+    //   authFlag = false;
+    // } else {
+      // console.log(`welcome ${user.displayName}`);
+      checkIfLoggedIn();
+    // }
   });
 
   const signInWithFacebook = async () => {
@@ -64,7 +69,7 @@ const LoadingScreen = ({ navigation }) => {
           // The firebase.auth.AuthCredential type that was used.
           let credential = error.credential;
           if (error.code == 'auth/account-exists-with-different-credential') {
-
+            Alert.alert("Seems like you already have signed in with Google. Please log in with that account!")
           }
         });
     }
@@ -146,28 +151,23 @@ const LoadingScreen = ({ navigation }) => {
   };
 
   useEffect(() => {
-    checkIfLoggedIn();
+    // checkIfLoggedIn();
     loadFonts();
-    console.disableYellowBox = true;
   }, []);
 
   const checkIfLoggedIn = () => {
     if (firebase.auth().currentUser != null) {
-      console.log("The object is", firebase.auth().currentUser);
+      //console.log("The object is", firebase.auth().currentUser);
+      console.log(`welcome ${firebase.auth().currentUser.displayName}`);
       navigation.navigate("Home");
     } else {
       // setHomescreen(false);
+      console.log("not yet logged in")
     }
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.backgroundContainer}>
-        <Image
-          style={styles.backgroundImage}
-          source={require("../assets/images/loading_bg.png")}
-        />
-      </View>
       <View style={styles.backgroundContainer}>
         <Image
           style={styles.logo}
