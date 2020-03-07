@@ -157,7 +157,7 @@ const HomeScreen = ({ route, navigation }) => {
       //refreshing={this.state.refreshing}
       //onEndReachedThreshold={10000000}
     />
-  );
+  ); 
 };
 export default HomeScreen;
 
