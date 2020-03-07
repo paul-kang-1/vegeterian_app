@@ -15,6 +15,7 @@ web-report/
 
 #firebase config
 firebase.js
+config.js
 
 #vsCode .history folder
 .history/
