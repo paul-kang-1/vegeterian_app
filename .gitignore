@@ -13,9 +13,12 @@ web-report/
 # macOS
 .DS_Store
 
-#firebase config
+# firebase config
 firebase.js
 config.js
 
-#vsCode .history folder
+# vsCode .history folder
 .history/
+
+# logs
+yarn-error.log
