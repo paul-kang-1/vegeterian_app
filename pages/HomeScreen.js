@@ -4,7 +4,7 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  TouchableOpacity,
+  TouchableWithoutFeedback,
   Image,
   ScrollView,
   BackHandler,
@@ -15,16 +15,12 @@ import Constants from "expo-constants";
 import firebase, { firestore } from "firebase";
 import Keyword from "./Keyword";
 
-//const MAP_API = "0abbbf5654f34e6dbb2606e6765f5614";
 
-const HomeScreen = ({ route, navigation }) => {
+const HomeScreen = ({ navigation }) => {
   const [dataSource, setDataSource] = useState([]);
   const [backClickCount, setBackClickCount] = useState(0);
   const [loading, setLoading] = useState(true); // for data
-  const ref = firestore().collection("restaurants");
-  //const { photoUrl } = route.params;
-  // Now we get the references of these images
-
+  const ref = firestore().collection("restaurants")
   const makeRemoteRequest = () => {
     return ref.onSnapshot(querySnapshot => {
       const restaurants = [];
@@ -48,7 +44,7 @@ const HomeScreen = ({ route, navigation }) => {
 
   const renderItem = ({ item }) => {
     return (
-      <TouchableOpacity
+      <TouchableWithoutFeedback
         onPress={() => {
           navigation.navigate("Restaurant", {
             id: item.id,
@@ -85,7 +81,7 @@ const HomeScreen = ({ route, navigation }) => {
             </View>
           </View>
         </View>
-      </TouchableOpacity>
+      </TouchableWithoutFeedback >
     );
   };
 
@@ -119,9 +115,14 @@ const HomeScreen = ({ route, navigation }) => {
   }, [handleBackButton]);
 
   onSignOut = () => {
-    // firebase.auth().signOut();
-    // navigation.navigate("Loading");
+    firebase.auth().signOut();
   };
+
+  firebase.auth().onAuthStateChanged(user=> {
+    if (user===null) {
+      navigation.navigate("Loading")
+    }
+  })
 
   const listHeader = () => {
     return (
@@ -174,7 +175,7 @@ const elevationShadowStyle = elevation => {
 const styles = StyleSheet.create({
   shadow: elevationShadowStyle(6),
   vsPick: {
-    height: 300,
+    height: 330,
     marginHorizontal: 15,
     paddingHorizontal: 10,
     paddingBottom: 10,

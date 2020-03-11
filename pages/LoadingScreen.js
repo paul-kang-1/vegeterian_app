@@ -1,80 +1,118 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Fragment } from "react";
 import {
   StyleSheet,
   Text,
+  TextInput,
   View,
   Image,
   ActivityIndicator,
-  TouchableOpacity,
-  Alert
+  Alert,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback
 } from "react-native";
-import * as firebase from 'firebase';
+import firebase from "firebase";
 import * as Google from "expo-google-app-auth";
 import * as Facebook from "expo-facebook";
 import * as Font from "expo-font";
-import '../firebase' 
-
+import "../firebase";
+/**
+ * Component for displaying the splashscreen / loginscreen
+ * @component
+ * @param {Object} navigation prop passed from navigator
+ */
 const LoadingScreen = ({ navigation }) => {
-  const googleProvider = new firebase.auth.GoogleAuthProvider;
+  /**
+   * React hooks state variables to show/hide login UI
+   * @type {[Boolean, Function]} Loading
+   */
   const [showLogin, setLogin] = useState(false);
-  // const [isLoading, setLoading] = useState(true);
+  /**
+   * State variables for user textInput at login (email / password)
+   * @type {[String, Function]} email
+   * @type {[String, Function]} password
+   */
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  /**
+   * Loads the required fonts and skip Login if there already is a signed in user.
+   * If user is not registered, show the login UI
+   * @method
+   * @return {void}
+   */
   const loadFonts = async () => {
     await Font.loadAsync({
-      "AlegreyaSans-Regular": require("../assets/fonts/AlegreyaSans-Regular.ttf"),
       "OpenSans-SemiBold": require("../assets/fonts/OpenSans-SemiBold.ttf"),
       "OpenSans-Bold": require("../assets/fonts/OpenSans-Bold.ttf"),
       "OpenSans-Regular": require("../assets/fonts/OpenSans-Regular.ttf"),
-      "El-Messiri-SemiBold": require("../assets/fonts/ElMessiri-SemiBold.ttf"),
       "Roboto-Light": require("../assets/fonts/Roboto-Light.ttf"),
       "Roboto-Medium": require("../assets/fonts/Roboto-Medium.ttf")
     });
-    setLogin(true);
-  };
-  // Flag to disregard the initial registration call
-  let authFlag = true;
-  // Listen for authentication state to change.
-  firebase.auth().onAuthStateChanged((user) => {
-    // if(authFlag){
-    //   console.log("initial call")
-    //   authFlag = false;
-    // } else {
-      // console.log(`welcome ${user.displayName}`);
+    // Listens to any changes in authentication state.
+    firebase.auth().onAuthStateChanged(user => {
       checkIfLoggedIn();
-    // }
-  });
-
-  const signInWithFacebook = async () => {
-    Facebook.initializeAsync("199623754607347");
-    const {
-      type,
-      token
-    } = await Facebook.logInWithReadPermissionsAsync("199623754607347", {
-      permissions: ['email', 'public_profile']
     });
+  };
+  /**
+   * Move to homescreen if the user exists. If not, show the login UI.
+   * @method
+   * @return {void}
+   */
+  const checkIfLoggedIn = () => {
+    if (firebase.auth().currentUser != null) {
+      navigation.navigate("Home");
+    } else {
+      setLogin(true);
+    }
+  };
+  /**
+   * @method
+   * @return {void}
+   */
+  const signInWithFacebook = async () => {
+    // Initialize FB login with the given APP ID
+    Facebook.initializeAsync("199623754607347");
+    const { type, token } = await Facebook.logInWithReadPermissionsAsync(
+      "199623754607347",
+      {
+        permissions: ["email", "public_profile"]
+      }
+    );
     if (type === "success") {
-      const credential = firebase.auth.FacebookAuthProvider.credential(token)
-      //console.log(credential)
+      const credential = firebase.auth.FacebookAuthProvider.credential(token);
       firebase
         .auth()
         .signInWithCredential(credential)
-        .then(function () {
+        .then(function() {
           navigation.navigate("Home");
         })
-        .catch(function (error) {
-          // Handle Errors here.
-          let errorCode = error.code;
-          let errorMessage = error.message;
-          // The email of the user's account used.
-          let email = error.email;
-          // The firebase.auth.AuthCredential type that was used.
-          let credential = error.credential;
-          if (error.code == 'auth/account-exists-with-different-credential') {
-            Alert.alert("Seems like you already have signed in with Google. Please log in with that account!")
+        .catch(function(error) {
+          /* 
+          For cases where the user have already signed up through a different provider with
+          the same e-mail. However, accounts with Gmail is an edge case, since Google provider
+          holds a higher priority regardless of which provider the user selected at the sign-up phase.
+          i.e., if the user signed up through Facebook with a Gmail address, the following error would
+          not occur even if the user signs in through Google. Instead, it will overwrite the existing
+          user provider information, thus throwing this error when the user attempts to sign out and 
+          sign in through Facebook again. The account linking feature in SettingScreen may be a solution,
+          since it keeps all the providers within the Firebase Auth database.
+          */
+          if (error.code == "auth/account-exists-with-different-credential") {
+            Alert.alert(
+              "Seems like you already have signed in with a different method.",
+               "Please sign-in with a different option and add different sign-in options\
+               in the app settings!"
+            );
           }
         });
     }
   };
-
+  /**
+   * Given the current Firebase user, skip the Firebase sign-up procedure if there
+   * already exists a user with the same provider uid.
+   * @method
+   * @param {Object} googleUser
+   * @param {Object} firebaseUser
+   */
   const isUserEqual = (googleUser, firebaseUser) => {
     if (firebaseUser) {
       var providerData = firebaseUser.providerData;
@@ -90,44 +128,14 @@ const LoadingScreen = ({ navigation }) => {
     }
     return false;
   };
-
-  const onSignIn = googleUser => {
-    //console.log('Google Auth Response', googleUser);
-    // We need to register an Observer on Firebase Auth to make sure auth is initialized.
-    var unsubscribe = firebase
-      .auth()
-      .onAuthStateChanged(function (firebaseUser) {
-        unsubscribe();
-        // Check if we are already signed-in Firebase with the correct user.
-        if (!isUserEqual(googleUser, firebaseUser)) {
-          // Build Firebase credential with the Google ID token.
-          const credential = googleProvider.credential(
-            googleUser.idToken,
-            googleUser.accessToken
-          );
-          // Sign in with credential from the Google user.
-          firebase
-            .auth()
-            .signInWithCredential(credential)
-            .then(function () {
-              navigation.navigate("Home");
-            })
-            .catch(function (error) {
-              // Handle Errors here.
-              var errorCode = error.code;
-              var errorMessage = error.message;
-              // The email of the user's account used.
-              var email = error.email;
-              // The firebase.auth.AuthCredential type that was used.
-              var credential = error.credential;
-              // ...
-            });
-        } else {
-          console.log("User already signed-in Firebase.");
-        }
-      });
-  };
-
+  /**
+   * @const {Object}
+   */
+  const googleProvider = new firebase.auth.GoogleAuthProvider();
+  /**
+   * @method
+   * @return {Object} 
+   */
   const signInWithGoogleAsync = async () => {
     try {
       const result = await Google.logInAsync({
@@ -149,71 +157,169 @@ const LoadingScreen = ({ navigation }) => {
       return { error: true };
     }
   };
+  /**
+   * 
+   * @method
+   * @param {*} googleUser 
+   */
+  const onSignIn = googleUser => {
+    // We need to register an Observer on Firebase Auth to make sure auth is initialized.
+    var unsubscribe = firebase
+      .auth()
+      .onAuthStateChanged(function(firebaseUser) {
+        unsubscribe();
+        // Check if we are already signed-in Firebase with the correct user.
+        if (!isUserEqual(googleUser, firebaseUser)) {
+          // Build Firebase credential with the Google ID token.
+          const credential = googleProvider.credential(
+            googleUser.idToken,
+            googleUser.accessToken
+          );
+          // Sign in with credential from the Google user.
+          firebase
+            .auth()
+            .signInWithCredential(credential)
+            .then(function() {
+              navigation.navigate("Home");
+            })
+            .catch(function(error) {
+              // Handle Errors here.
+              var errorCode = error.code;
+              var errorMessage = error.message;
+              console.log(`${errorCode} Error: ${errorMessage}`)
+            });
+        } else {
+          console.log("User already signed-in Firebase.");
+        }
+      });
+  };
 
   useEffect(() => {
-    // checkIfLoggedIn();
     loadFonts();
   }, []);
 
-  const checkIfLoggedIn = () => {
-    if (firebase.auth().currentUser != null) {
-      //console.log("The object is", firebase.auth().currentUser);
-      console.log(`welcome ${firebase.auth().currentUser.displayName}`);
-      navigation.navigate("Home");
-    } else {
-      // setHomescreen(false);
-      console.log("not yet logged in")
-    }
-  };
-
   return (
     <View style={styles.container}>
-      <View style={styles.backgroundContainer}>
+      <View style={styles.logoContainer}>
         <Image
           style={styles.logo}
           source={require("../assets/images/app_title.png")}
+          resizeMode="contain"
         />
       </View>
-      {showLogin ? (
-        <React.Fragment>
-          <View style={{ flex: 1 }} />
-          <View
-            style={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center"
-            }}
-          >
-            <Text style={styles.loginText}>Start With:</Text>
-            <TouchableOpacity
-              style={styles.loginButtonContainer}
-              onPress={() => signInWithFacebook()}
-            >
-              <Image
-                style={styles.LoginButton}
-                resizeMode={"contain"}
-                source={require("../assets/images/facebook_login.png")}
+      <KeyboardAvoidingView
+        style={{ flex: 1, alignSelf: "center", width: "100%" }}
+        behavior="padding"
+        enabled
+      >
+        {showLogin ? (
+          <Fragment>
+            <View>
+              <TextInput
+                style={styles.loginTextField}
+                value={email}
+                onChangeText={text => {
+                  setEmail(text);
+                }}
+                placeholder="Email"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                blurOnSubmit={true}
               />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.loginButtonContainer}
-              onPress={() => signInWithGoogleAsync()}
-            >
-              <Image
-                style={styles.LoginButton}
-                source={require("../assets/images/google_login.png")}
+              <TextInput
+                style={styles.loginTextField}
+                value={password}
+                onChangeText={text => {
+                  setPassword(text);
+                }}
+                placeholder="Password"
+                secureTextEntry={true}
+                autoCapitalize="none"
+                autoCorrect={false}
               />
-            </TouchableOpacity>
-          </View>
-        </React.Fragment>
-      ) : (
-          <React.Fragment>
-            <View style={{ flex: 1 }} />
+              <View style={styles.loginButton}>
+                <Text
+                  style={styles.loginText}
+                  onPress={() => console.log("hi")}
+                >
+                  Login
+                </Text>
+              </View>
+              <Text style={styles.otherText}>Or login with:</Text>
+              <View style={{ flexDirection: "row", marginHorizontal: 25 }}>
+                <TouchableWithoutFeedback onPress={() => signInWithFacebook()}>
+                  <View style={styles.otherLogin}>
+                    <Image
+                      source={require("../assets/images/facebook_login.png")}
+                      style={{
+                        height: "100%",
+                        width: 40,
+                        backgroundColor: "#2553B4",
+                        alignSelf: "center"
+                      }}
+                      resizeMode="contain"
+                    />
+                    <Text style={styles.snsText}>facebook</Text>
+                  </View>
+                </TouchableWithoutFeedback>
+                <TouchableWithoutFeedback
+                  onPress={() => signInWithGoogleAsync()}
+                >
+                  <View style={styles.otherLogin}>
+                    <Image
+                      source={require("../assets/images/google_login.png")}
+                      style={{
+                        height: "80%",
+                        width: 40,
+                        alignSelf: "center"
+                      }}
+                      resizeMode="contain"
+                    />
+                    <Text style={styles.snsText}>google</Text>
+                  </View>
+                </TouchableWithoutFeedback>
+              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignSelf: "center",
+                  marginTop: 10
+                }}
+              >
+                <Text
+                  style={[
+                    styles.otherText,
+                    styles.underline,
+                    {
+                      borderRightWidth: 1,
+                      borderRightColor: "#ADADAD",
+                      paddingRight: 10
+                    }
+                  ]}
+                >
+                  Sign up!
+                </Text>
+                <Text
+                  style={[
+                    styles.otherText,
+                    styles.underline,
+                    { paddingLeft: 10 }
+                  ]}
+                >
+                  Forgot Password?
+                </Text>
+              </View>
+            </View>
+          </Fragment>
+        ) : (
+          <Fragment>
             <View style={{ flex: 1, justifyContent: "center" }}>
               <ActivityIndicator size="large" />
             </View>
-          </React.Fragment>
+          </Fragment>
         )}
+      </KeyboardAvoidingView>
     </View>
   );
 };
@@ -221,45 +327,63 @@ const LoadingScreen = ({ navigation }) => {
 export default LoadingScreen;
 
 const styles = StyleSheet.create({
+  underline: { textDecorationLine: "underline" },
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center"
+    backgroundColor: "white"
   },
-  backgroundContainer: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0
-  },
-  backgroundImage: {
-    width: "100%",
-    height: "100%"
-  },
+  logoContainer: { flex: 0.75, justifyContent: "flex-end", marginBottom: 50 },
   logo: {
-    alignSelf: "center",
-    flex: 1,
-    aspectRatio: 1 / 4,
-    resizeMode: "contain"
+    paddingBottom: 30,
+    width: 220,
+    height: 220,
+    alignSelf: "center"
   },
-  LoginButton: {
-    maxWidth: "100%",
-    maxHeight: "auto",
-    resizeMode: "contain"
+  loginTextField: {
+    width: "85%",
+    height: 40,
+    borderBottomWidth: 1,
+    borderColor: "#ADADAD",
+    alignSelf: "center",
+    paddingHorizontal: 10,
+    marginBottom: 20,
+    fontSize: 18,
+    fontFamily: "Roboto-Light"
+  },
+  loginButton: {
+    width: "85%",
+    height: 45,
+    backgroundColor: "#FF4D12",
+    alignSelf: "center",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 10,
+    marginBottom: 25
   },
   loginText: {
-    color: "white",
-    //alignSelf: "center",
-    marginTop: 30,
-    marginBottom: 15,
+    fontFamily: "Roboto-Light",
     fontSize: 18,
-    fontFamily: "AlegreyaSans-Regular"
+    color: "white"
   },
-  loginButtonContainer: {
-    maxWidth: "75%",
-    maxHeight: "15%",
-    justifyContent: "center",
-    marginBottom: 15
+  otherLogin: {
+    flex: 1,
+    flexDirection: "row",
+    height: 45,
+    borderWidth: 2,
+    borderColor: "#ADADAD",
+    marginVertical: 10,
+    marginHorizontal: 5,
+    justifyContent: "flex-start"
+  },
+  otherText: {
+    alignSelf: "center",
+    fontFamily: "Roboto-Light",
+    color: "#ADADAD"
+  },
+  snsText: {
+    alignSelf: "center",
+    fontFamily: "Roboto-Medium",
+    color: "#ADADAD",
+    marginLeft: 25
   }
 });

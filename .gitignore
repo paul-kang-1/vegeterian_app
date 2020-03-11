@@ -22,3 +22,7 @@ config.js
 
 # logs
 yarn-error.log
+
+# vscode / idea related modules
+.vscode/
+.idea/

@@ -1,21 +1,23 @@
 import React from "react";
-import { 
-    View,
-    Text,
-    StyleSheet
-} from "react-native";
+import { View, Text, StyleSheet, Image } from "react-native";
+import firebase from "firebase";
 
-const SettingScreen = (props) => (
+const SettingScreen = ({ route, navigation }) => {
+  const photoUrl = firebase.auth().currentUser.photoURL;
+  console.log(photoUrl);
+  return (
     <View style={styles.container}>
-        <Text>SettingScreen</Text>
+      <Image style={styles.thumbnail} source={{ uri: photoUrl }} />
     </View>
-    )
+  );
+};
 export default SettingScreen;
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center'
-    }
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  thumbnail: { width: 85, height: 85, borderRadius : 42.5 }
 });
