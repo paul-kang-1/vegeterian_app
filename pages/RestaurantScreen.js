@@ -12,75 +12,53 @@ import {
 import MapView from "react-native-maps";
 import BGCarousel, { DEVICE_WIDTH, DEVICE_HEIGHT } from "./BGCarousel";
 import Constants from "expo-constants";
-import StarRating from "react-native-star-rating";
 import Keyword from "./Keyword";
 
 const RestaurantScreen = ({ navigation, route }) => {
   const [dataSource, setDataSource] = useState(null);
   const [favorite, setFavorite] = useState(false);
   const { id, ref } = route.params;
+  let schedule;
   const fetchAdditionalInfo = id => {
     var docRef = ref.doc(id);
     docRef.get().then(function(doc) {
-      setDataSource(doc.data());
+      var result = doc.data().d;
+      result.coordinates = doc.data().l;
+      setDataSource(result);
     });
   };
+  function getWeekSchedule(schedule) {
+    const { sun, mon, tue, wed, thu, fri, sat } = schedule;
+    let weekday = [mon, tue, wed, thu, fri, sat, sun];
+    return weekday;
+  }
 
-  const icons = [
-    require("../assets/icons/rating_food.png"),
-    require("../assets/icons/rating_price.png"),
-    require("../assets/icons/rating_mood.png")
-  ];
+  function groupSchedule(scheduleArray) {
+    const result = [0];
+    for (let i = 1; i < scheduleArray.length; i++) {
+      if (!isEqual(scheduleArray[i - 1], scheduleArray[i])) {
+        result.push(i);
+      }
+    }
+    console.log(result);
+    return result;
+  }
 
-  const rating = dataSource
-    ? [
-        dataSource.rating_detail.food,
-        dataSource.rating_detail.price,
-        dataSource.rating_detail.mood
-      ]
-    : [];
-
-  // const ratingModule = (icons, rating) => {
-  //   const res = [];
-  //   for (var i = 0; i < icons.length; i++) {
-  //     res.push(
-  //       <View style={{ flexDirection: "row", marginTop: 5 }} >
-  //         <Image
-  //           style={{ width: 18, height: 20, marginRight: 5 }}
-  //           source={icons[i]}
-  //           resizeMode="contain"
-  //         />
-  //         <StarRating
-  //           disabled={true}
-  //           maxStars={5}
-  //           rating={rating[i]}
-  //           emptyStar={"star-o"}
-  //           emptyStarColor="#ADADAD"
-  //           fullStar={"star"}
-  //           fullStarColor="#FF4D12"
-  //           halfStarEnabled={false}
-  //           starStyle={{ marginLeft: 3 }}
-  //           starSize={18}
-  //         />
-  //         <Text
-  //           style={{
-  //             marginLeft: 5,
-  //             fontFamily: "OpenSans-SemiBold",
-  //             fontSize: 14,
-  //             color: "#ADADAD"
-  //           }}
-  //         >
-  //           {rating[i]}
-  //         </Text>
-  //       </View>
-  //     );
-  //   }
-  //   return res;
-  // };
+  function isEqual(a, b) {
+    return (JSON.stringify(a) == JSON.stringify(b));
+  }
 
   useEffect(() => {
     fetchAdditionalInfo(id);
   }, []);
+
+  useEffect(() => {
+    if (dataSource != null) {
+      schedule = getWeekSchedule(dataSource["schedule"]);
+      console.log(schedule);
+      groupSchedule(schedule);
+    }
+  });
 
   return (
     <View style={styles.mainContainer}>
@@ -96,7 +74,7 @@ const RestaurantScreen = ({ navigation, route }) => {
                   bottom: 0,
                   padding: 10
                 }}
-                onPress={() => console.log(dataSource.coordinates._lat)}
+                onPress={() => console.log(dataSource["schedule"])}
               >
                 <Image
                   source={require("../assets/icons/button_WriteReview.png")}
@@ -139,34 +117,12 @@ const RestaurantScreen = ({ navigation, route }) => {
                   <Text style={styles.restaurantTitleText}>
                     {dataSource.name}
                   </Text>
-                  {/* <View style={styles.statusContainer}>
-                    <Image
-                      style={[styles.statusIcon, { marginBottom: 2 }]}
-                      source={require("../assets/icons/viewIcon.png")}
-                      resizeMode="contain"
-                    />
-                    <Text style={styles.statusText}>1223</Text>
-                    <Image
-                      style={styles.statusIcon}
-                      source={require("../assets/icons/commentIcon.png")}
-                      resizeMode="contain"
-                    />
-                    <Text style={styles.statusText}>232</Text>
-                    <Image
-                      style={[styles.statusIcon, { marginBottom: 2 }]}
-                      source={require("../assets/icons/starIcon.png")}
-                      resizeMode="contain"
-                    />
-                    <Text style={styles.statusText}>100</Text>
-                  </View> */}
                 </View>
                 <Text style={styles.restaurantRatingText}>
                   {dataSource.rating}
                 </Text>
               </View>
-              {/* <View style={{ alignSelf: "flex-end", marginRight: 20 }}>
-                {ratingModule(icons, rating)}
-              </View> */}
+
               <View
                 style={{
                   borderTopColor: "#C4C4C4",
@@ -186,19 +142,18 @@ const RestaurantScreen = ({ navigation, route }) => {
                     marginTop: 0
                   }}
                   initialRegion={{
-                    latitude: dataSource.coordinates._lat,
-                    longitude: dataSource.coordinates._long,
+                    latitude: dataSource.coordinates["U"],
+                    longitude: dataSource.coordinates["k"],
                     latitudeDelta: 0.0022,
                     longitudeDelta: 0.0221
                   }}
                 >
                   <MapView.Marker
                     coordinate={{
-                      latitude: dataSource.coordinates._lat,
-                      longitude: dataSource.coordinates._long
+                      latitude: dataSource.coordinates["U"],
+                      longitude: dataSource.coordinates["k"]
                     }}
-                    title={"title"}
-                    description={"description"}
+                    title={dataSource.name}
                   />
                 </MapView>
                 <Text
@@ -228,6 +183,7 @@ const RestaurantScreen = ({ navigation, route }) => {
                 <Text style={{ fontFamily: "OpenSans-Bold", fontSize: 20 }}>
                   Open Hours
                 </Text>
+                <Text>{"data"}</Text>
               </View>
             </View>
           </View>
@@ -271,7 +227,7 @@ const styles = StyleSheet.create({
     marginRight: 15,
     marginTop: 10,
     fontSize: 40,
-    fontFamily: "Roboto-Medium",
+    fontFamily: "Roboto-Light",
     color: "#FF4D12"
   },
   statusText: {

@@ -16,16 +16,21 @@ import firebase, { firestore } from "firebase";
 import Keyword from "./Keyword";
 
 
+/**
+ * Component for displaying the home screen
+ * @component
+ * @param {Object} navigation prop passed from navigator
+ */
 const HomeScreen = ({ navigation }) => {
   const [dataSource, setDataSource] = useState([]);
   const [backClickCount, setBackClickCount] = useState(0);
   const [loading, setLoading] = useState(true); // for data
-  const ref = firestore().collection("restaurants")
+  const ref = firestore().collection("test")
   const makeRemoteRequest = () => {
     return ref.onSnapshot(querySnapshot => {
       const restaurants = [];
       querySnapshot.forEach(doc => {
-        const { name, rating, type, thumbnail, address } = doc.data();
+        const { name, rating, type, thumbnail, address } = doc.data().d;
         restaurants.push({
           id: doc.id,
           name,
@@ -89,6 +94,14 @@ const HomeScreen = ({ navigation }) => {
     makeRemoteRequest();
   }, []);
 
+
+  useEffect(() => {
+    BackHandler.addEventListener("hardwareBackPress", handleBackButton);
+    return () => {
+      BackHandler.removeEventListener("hardwareBackPress", handleBackButton);
+    };
+  }, [handleBackButton]);
+
   backButtonEffect = () => {
     if (navigation.isFocused()) {
       ToastAndroid.show("Press Back again to Exit", ToastAndroid.SHORT);
@@ -102,17 +115,11 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
-  handleBackButton = () => {
+  const handleBackButton = () => {
     backClickCount == 1 ? BackHandler.exitApp() : backButtonEffect();
     return true;
   };
 
-  useEffect(() => {
-    BackHandler.addEventListener("hardwareBackPress", handleBackButton);
-    return () => {
-      BackHandler.removeEventListener("hardwareBackPress", handleBackButton);
-    };
-  }, [handleBackButton]);
 
   onSignOut = () => {
     firebase.auth().signOut();
@@ -245,6 +252,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginRight: 10,
     marginVertical: 15,
-    paddingTop: 2
   }
 });

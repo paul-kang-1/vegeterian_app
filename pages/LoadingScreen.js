@@ -49,6 +49,7 @@ const LoadingScreen = ({ navigation }) => {
     });
     // Listens to any changes in authentication state.
     firebase.auth().onAuthStateChanged(user => {
+      //console.log(user);
       checkIfLoggedIn();
     });
   };
