@@ -15,7 +15,6 @@ import Constants from "expo-constants";
 import firebase, { firestore } from "firebase";
 import Keyword from "./Keyword";
 
-
 /**
  * Component for displaying the home screen
  * @component
@@ -25,7 +24,7 @@ const HomeScreen = ({ navigation }) => {
   const [dataSource, setDataSource] = useState([]);
   const [backClickCount, setBackClickCount] = useState(0);
   const [loading, setLoading] = useState(true); // for data
-  const ref = firestore().collection("test")
+  const ref = firestore().collection("test");
   const makeRemoteRequest = () => {
     return ref.onSnapshot(querySnapshot => {
       const restaurants = [];
@@ -73,8 +72,15 @@ const HomeScreen = ({ navigation }) => {
               <Text style={styles.restaurantTitleText}>{item.name}</Text>
               <Text>{item.address.address_depth2}</Text>
             </View>
-            <View style={{flexDirection:'row'}}>
-              <View style={{ width: 25, height: 25, marginTop: 19, marginRight: 10 }}>
+            <View style={{ flexDirection: "row" }}>
+              <View
+                style={{
+                  width: 25,
+                  height: 25,
+                  marginTop: 19,
+                  marginRight: 10
+                }}
+              >
                 <Image
                   style={{ width: "100%", height: "100%" }}
                   source={require("../assets/icons/heart.png")}
@@ -86,14 +92,13 @@ const HomeScreen = ({ navigation }) => {
             </View>
           </View>
         </View>
-      </TouchableWithoutFeedback >
+      </TouchableWithoutFeedback>
     );
   };
 
   useEffect(() => {
     makeRemoteRequest();
   }, []);
-
 
   useEffect(() => {
     BackHandler.addEventListener("hardwareBackPress", handleBackButton);
@@ -120,16 +125,15 @@ const HomeScreen = ({ navigation }) => {
     return true;
   };
 
-
   onSignOut = () => {
     firebase.auth().signOut();
   };
 
-  firebase.auth().onAuthStateChanged(user=> {
-    if (user===null) {
-      navigation.navigate("Loading")
+  firebase.auth().onAuthStateChanged(user => {
+    if (user === null) {
+      navigation.navigate("Loading");
     }
-  })
+  });
 
   const listHeader = () => {
     return (
@@ -149,23 +153,25 @@ const HomeScreen = ({ navigation }) => {
         </View>
       </View>
     );
-  }
+  };
 
   return (
-    <FlatList
-      data={dataSource}
-      renderItem={renderItem}
-      keyExtractor={item => item.name}
-      // initialNumToRender={2}
-      // maxToRenderPerBatch={2}
-      scrollEnabled={true}
-      ListHeaderComponent={listHeader()}
-      showsVerticalScrollIndicator={false}
-      //onRefresh={this.handleRefresh}
-      //refreshing={this.state.refreshing}
-      //onEndReachedThreshold={10000000}
-    />
-  ); 
+    <View style={{ backgroundColor: "white" }}>
+      <FlatList
+        data={dataSource}
+        renderItem={renderItem}
+        keyExtractor={item => item.name}
+        // initialNumToRender={2}
+        // maxToRenderPerBatch={2}
+        scrollEnabled={true}
+        ListHeaderComponent={listHeader()}
+        showsVerticalScrollIndicator={false}
+        //onRefresh={this.handleRefresh}
+        //refreshing={this.state.refreshing}
+        //onEndReachedThreshold={10000000}
+      />
+    </View>
+  );
 };
 export default HomeScreen;
 
@@ -251,6 +257,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 15,
     marginRight: 10,
-    marginVertical: 15,
+    marginVertical: 15
   }
 });
