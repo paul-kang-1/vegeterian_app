@@ -8,7 +8,9 @@ import {
   TouchableWithoutFeedback,
   Animated,
   Dimensions,
-  TextInput
+  TextInput,
+  BackHandler,
+  ToastAndroid
 } from "react-native";
 import firebase from "firebase";
 import { GeoFirestore } from "geofirestore";
@@ -20,20 +22,25 @@ import * as Permissions from "expo-permissions";
 const { width, height } = Dimensions.get("window");
 const CARD_HEIGHT = height / 3.5;
 const CARD_WIDTH = width / 1.5;
-let animation = new Animated.Value(0);
 
 const SearchScreen = ({ navigation }) => {
+  const [backClickCount, setBackClickCount] = useState(0);
+
   const [errorMessage, setErrorMessage] = useState("");
   const [myLocation, setMyLocation] = useState();
   let newLocation;
   let currentIndex = 0;
+  let animation = new Animated.Value(0);
+  let timeouts = [];
   const [markers, setMarkers] = useState();
   const [search, setSearch] = useState("");
-  const mapRef = useRef(null);
+  const mapRef = useRef();
+  const scrollRef = useRef();
   // const [interpolations, setInterpolations] = useState();
   const firestore = firebase.firestore();
   const geofirestore = new GeoFirestore(firestore);
   const geocollection = geofirestore.collection("restaurants");
+  const ref = firebase.firestore().collection("restaurants");
 
   const getLocationAsync = async () => {
     let { status } = await Permissions.askAsync(Permissions.LOCATION);
@@ -47,6 +54,7 @@ const SearchScreen = ({ navigation }) => {
       latitude: location.coords.latitude,
       longitude: location.coords.longitude
     });
+    initScrollPosition();
     if (location) {
       const { latitude, longitude } = location.coords;
       makeQuery({ latitude: latitude, longitude: longitude });
@@ -56,12 +64,20 @@ const SearchScreen = ({ navigation }) => {
   function redoSearch() {
     if (myLocation && newLocation) {
       currentIndex = 0;
+      initScrollPosition();
       setMyLocation({
         latitude: newLocation.latitude,
         longitude: newLocation.longitude
       });
       makeQuery(newLocation);
     }
+  }
+
+  function initScrollPosition() {
+    scrollRef.current.getNode().scrollTo({
+      x: 0,
+      animated: true
+    });
   }
 
   function makeQuery(location) {
@@ -93,6 +109,7 @@ const SearchScreen = ({ navigation }) => {
     return 0;
   }
 
+
   useEffect(() => {
     getLocationAsync();
     console.log("useeffect");
@@ -100,7 +117,6 @@ const SearchScreen = ({ navigation }) => {
 
   useEffect(() => {
     if (mapRef && markers) {
-      if(!currentIndex) animation.setValue(0);
       animation.addListener(({ value }) => {
         let index = Math.floor(value / (CARD_WIDTH + 20) + 0.3);
         if (index >= markers.length) {
@@ -113,7 +129,9 @@ const SearchScreen = ({ navigation }) => {
         clearTimeout(regionTimeout);
         let regionTimeout = setTimeout(() => {
           if (currentIndex !== index) {
-            console.log(`current: ${currentIndex}, new: ${index}, ${markers[index].id}`);
+            console.log(
+              `current: ${currentIndex}, new: ${index}, ${markers[index].id}`
+            );
             currentIndex = index;
             const coordinate = {
               latitude: markers[index].data().coords["U"],
@@ -129,7 +147,8 @@ const SearchScreen = ({ navigation }) => {
               550
             );
           }
-        }, 10);
+        }, 20);
+        timeouts.push(regionTimeout);
       });
     }
   });
@@ -146,6 +165,32 @@ const SearchScreen = ({ navigation }) => {
     return n % 1 ? n : n + ".0";
   }
 
+  useEffect(() => {
+    BackHandler.addEventListener("hardwareBackPress", handleBackButton);
+    return () => {
+      BackHandler.removeEventListener("hardwareBackPress", handleBackButton);
+    };
+  }, [backClickCount]);
+
+  backButtonEffect = () => {
+    if (navigation.isFocused()) {
+      ToastAndroid.show("Press Back again to Exit", ToastAndroid.SHORT);
+      setBackClickCount(1);
+      console.log(backClickCount);
+      setTimeout(function () {
+        setBackClickCount(0);
+      }, 1000);
+    } else {
+      console.log("go Back");
+      navigation.pop();
+    }
+  };
+
+  const handleBackButton = () => {
+    console.log(`backclick: ${backClickCount}`);
+    backClickCount == 1 ? BackHandler.exitApp() : backButtonEffect();
+    return true;
+  };
   return (
     <View style={styles.container}>
       {myLocation ? (
@@ -176,7 +221,7 @@ const SearchScreen = ({ navigation }) => {
             >
               <Image
                 source={require("../assets/icons/marker_myLocation.png")}
-                style={{ width: 30, height: 30}}
+                style={{ width: 30, height: 30 }}
               />
             </MapView.Marker>
             {markers
@@ -191,7 +236,7 @@ const SearchScreen = ({ navigation }) => {
                       {
                         scale: animation.interpolate({
                           inputRange,
-                          outputRange: [1, 1.75, 1],
+                          outputRange: [1, 1.5, 1],
                           extrapolate: "clamp"
                         })
                       }
@@ -206,12 +251,11 @@ const SearchScreen = ({ navigation }) => {
                       }}
                       title={marker.id}
                     >
-                      <Animated.View  style={styles.markerWrap}>
                       <Animated.Image
-                        source={require("../assets/icons/marker_myLocation.png")}
-                        style={[{ width: 20, height: 20}, scaleStyle]}
-                    />
-                      </Animated.View>
+                        source={require("../assets/icons/pin_location.png")}
+                        style={[{ width: 35, height: 35 }, scaleStyle]}
+                        resizeMode="cover"
+                      />
                     </MapView.Marker>
                   );
                 })
@@ -223,7 +267,7 @@ const SearchScreen = ({ navigation }) => {
               style={styles.myLocationButtonImage}
             />
           </TouchableWithoutFeedback>
-          <TouchableWithoutFeedback>
+          <TouchableWithoutFeedback onPress={()=> console.log(navigation.isFocused())}>
             <Image
               source={require("../assets/icons/button_filter.png")}
               style={styles.filterButtonImage}
@@ -277,12 +321,18 @@ const SearchScreen = ({ navigation }) => {
           )}
           style={styles.scrollView}
           contentContainerStyle={styles.endPadding}
+          ref={scrollRef}
         >
           {markers
             ? markers.map((marker, index) => {
                 return (
                   <TouchableWithoutFeedback
-                    onPress={() => console.log(marker.id)}
+                    onPress={() => {
+                      navigation.navigate("Restaurant", {
+                        id: marker.id,
+                        ref: ref
+                      });
+                    }}
                     key={index}
                   >
                     <View style={[styles.card, styles.shadow]}>
@@ -469,6 +519,6 @@ const styles = StyleSheet.create({
   },
   markerWrap: {
     alignItems: "center",
-    justifyContent: "center",
-  },
+    justifyContent: "center"
+  }
 });

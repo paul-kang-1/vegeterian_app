@@ -6,7 +6,6 @@ import {
   FlatList,
   TouchableWithoutFeedback,
   Image,
-  ScrollView,
   BackHandler,
   ToastAndroid,
   Button
@@ -105,12 +104,13 @@ const HomeScreen = ({ navigation }) => {
     return () => {
       BackHandler.removeEventListener("hardwareBackPress", handleBackButton);
     };
-  }, [handleBackButton]);
+  }, [backClickCount]);
 
   backButtonEffect = () => {
     if (navigation.isFocused()) {
       ToastAndroid.show("Press Back again to Exit", ToastAndroid.SHORT);
       setBackClickCount(1);
+      console.log(backClickCount)
       setTimeout(function() {
         setBackClickCount(0);
       }, 1000);
@@ -121,6 +121,7 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleBackButton = () => {
+    console.log(`backclick: ${backClickCount}`)
     backClickCount == 1 ? BackHandler.exitApp() : backButtonEffect();
     return true;
   };
@@ -144,7 +145,8 @@ const HomeScreen = ({ navigation }) => {
           </Text>
         </View>
         <View style={[styles.vsPick, styles.shadow]}>
-          <Button onPress={() => onSignOut()} title={"Merge Account"} />
+          {/* <Button onPress={() => onSignOut()} title={"Merge Account"} /> */}
+          <Button onPress={() => console.log(navigation)} title={"Merge Account"} />
         </View>
         <View style={styles.titleContainer2}>
           <Text style={styles.pageTitle}>

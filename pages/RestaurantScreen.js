@@ -48,6 +48,10 @@ const RestaurantScreen = ({ navigation, route }) => {
     return (JSON.stringify(a) == JSON.stringify(b));
   }
 
+  function displayRating(n) {
+    return n % 1 ? n : n + ".0";
+  }
+
   useEffect(() => {
     fetchAdditionalInfo(id);
   }, []);
@@ -74,7 +78,7 @@ const RestaurantScreen = ({ navigation, route }) => {
                   bottom: 0,
                   padding: 10
                 }}
-                onPress={() => console.log(dataSource["schedule"])}
+                onPress={() => navigation.navigate("Review")}
               >
                 <Image
                   source={require("../assets/icons/button_WriteReview.png")}
@@ -114,12 +118,12 @@ const RestaurantScreen = ({ navigation, route }) => {
                 }}
               >
                 <View>
-                  <Text style={styles.restaurantTitleText}>
+                  <Text style={styles.restaurantTitleText} numberOfLines={1}>
                     {dataSource.name}
                   </Text>
                 </View>
                 <Text style={styles.restaurantRatingText}>
-                  {dataSource.rating}
+                  {displayRating(dataSource.rating)}
                 </Text>
               </View>
 

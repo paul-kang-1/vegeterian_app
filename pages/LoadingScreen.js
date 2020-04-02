@@ -45,7 +45,8 @@ const LoadingScreen = ({ navigation }) => {
       "OpenSans-Bold": require("../assets/fonts/OpenSans-Bold.ttf"),
       "OpenSans-Regular": require("../assets/fonts/OpenSans-Regular.ttf"),
       "Roboto-Light": require("../assets/fonts/Roboto-Light.ttf"),
-      "Roboto-Medium": require("../assets/fonts/Roboto-Medium.ttf")
+      "Roboto-Medium": require("../assets/fonts/Roboto-Medium.ttf"),
+      "Roboto-Bold": require("../assets/fonts/Roboto-Bold.ttf")
     });
     // Listens to any changes in authentication state.
     firebase.auth().onAuthStateChanged(user => {
@@ -100,7 +101,7 @@ const LoadingScreen = ({ navigation }) => {
           if (error.code == "auth/account-exists-with-different-credential") {
             Alert.alert(
               "Seems like you already have signed in with a different method.",
-               "Please sign-in with a different option and add different sign-in options\
+              "Please sign-in with a different option and add different sign-in options\
                in the app settings!"
             );
           }
@@ -135,7 +136,7 @@ const LoadingScreen = ({ navigation }) => {
   const googleProvider = new firebase.auth.GoogleAuthProvider();
   /**
    * @method
-   * @return {Object} 
+   * @return {Object}
    */
   const signInWithGoogleAsync = async () => {
     try {
@@ -159,9 +160,8 @@ const LoadingScreen = ({ navigation }) => {
     }
   };
   /**
-   * 
    * @method
-   * @param {*} googleUser 
+   * @param {*} googleUser
    */
   const onSignIn = googleUser => {
     // We need to register an Observer on Firebase Auth to make sure auth is initialized.
@@ -187,7 +187,7 @@ const LoadingScreen = ({ navigation }) => {
               // Handle Errors here.
               var errorCode = error.code;
               var errorMessage = error.message;
-              console.log(`${errorCode} Error: ${errorMessage}`)
+              console.log(`${errorCode} Error: ${errorMessage}`);
             });
         } else {
           console.log("User already signed-in Firebase.");
@@ -288,28 +288,32 @@ const LoadingScreen = ({ navigation }) => {
                   marginTop: 10
                 }}
               >
-                <Text
-                  style={[
-                    styles.otherText,
-                    styles.underline,
-                    {
-                      borderRightWidth: 1,
-                      borderRightColor: "#ADADAD",
-                      paddingRight: 10
-                    }
-                  ]}
-                >
-                  Sign up!
-                </Text>
-                <Text
-                  style={[
-                    styles.otherText,
-                    styles.underline,
-                    { paddingLeft: 10 }
-                  ]}
-                >
-                  Forgot Password?
-                </Text>
+                <TouchableWithoutFeedback onPress={()=> navigation.navigate("Signup")}>
+                  <Text
+                    style={[
+                      styles.otherText,
+                      styles.underline,
+                      {
+                        borderRightWidth: 1,
+                        borderRightColor: "#ADADAD",
+                        paddingRight: 10
+                      }
+                    ]}
+                  >
+                    Sign up!
+                  </Text>
+                </TouchableWithoutFeedback>
+                <TouchableWithoutFeedback>
+                  <Text
+                    style={[
+                      styles.otherText,
+                      styles.underline,
+                      { paddingLeft: 10 }
+                    ]}
+                  >
+                    Forgot Password?
+                  </Text>
+                </TouchableWithoutFeedback>
               </View>
             </View>
           </Fragment>
