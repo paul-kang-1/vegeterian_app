@@ -14,7 +14,7 @@ import firebase from "firebase";
 import * as Google from "expo-google-app-auth";
 import * as Facebook from "expo-facebook";
 import * as Font from "expo-font";
-import "../firebase";
+// import "../firebase";
 /**
  * Component for displaying the splashscreen / loginscreen
  * @component
@@ -22,50 +22,12 @@ import "../firebase";
  */
 const LoadingScreen = ({ navigation }) => {
   /**
-   * React hooks state variables to show/hide login UI
-   * @type {[Boolean, Function]} Loading
-   */
-  const [showLogin, setLogin] = useState(false);
-  /**
    * State variables for user textInput at login (email / password)
    * @type {[String, Function]} email
    * @type {[String, Function]} password
    */
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  /**
-   * Loads the required fonts and skip Login if there already is a signed in user.
-   * If user is not registered, show the login UI
-   * @method
-   * @return {void}
-   */
-  const loadFonts = async () => {
-    await Font.loadAsync({
-      "OpenSans-SemiBold": require("../assets/fonts/OpenSans-SemiBold.ttf"),
-      "OpenSans-Bold": require("../assets/fonts/OpenSans-Bold.ttf"),
-      "OpenSans-Regular": require("../assets/fonts/OpenSans-Regular.ttf"),
-      "Roboto-Light": require("../assets/fonts/Roboto-Light.ttf"),
-      "Roboto-Medium": require("../assets/fonts/Roboto-Medium.ttf"),
-      "Roboto-Bold": require("../assets/fonts/Roboto-Bold.ttf")
-    });
-    // Listens to any changes in authentication state.
-    firebase.auth().onAuthStateChanged(user => {
-      //console.log(user);
-      checkIfLoggedIn();
-    });
-  };
-  /**
-   * Move to homescreen if the user exists. If not, show the login UI.
-   * @method
-   * @return {void}
-   */
-  const checkIfLoggedIn = () => {
-    if (firebase.auth().currentUser != null) {
-      navigation.navigate("Home");
-    } else {
-      setLogin(true);
-    }
-  };
   /**
    * @method
    * @return {void}
@@ -195,10 +157,6 @@ const LoadingScreen = ({ navigation }) => {
       });
   };
 
-  useEffect(() => {
-    loadFonts();
-  }, []);
-
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
@@ -213,117 +171,104 @@ const LoadingScreen = ({ navigation }) => {
         behavior="padding"
         enabled
       >
-        {showLogin ? (
-          <Fragment>
-            <View>
-              <TextInput
-                style={styles.loginTextField}
-                value={email}
-                onChangeText={text => {
-                  setEmail(text);
-                }}
-                placeholder="Email"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoCorrect={false}
-                blurOnSubmit={true}
-              />
-              <TextInput
-                style={styles.loginTextField}
-                value={password}
-                onChangeText={text => {
-                  setPassword(text);
-                }}
-                placeholder="Password"
-                secureTextEntry={true}
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-              <View style={styles.loginButton}>
-                <Text
-                  style={styles.loginText}
-                  onPress={() => console.log("hi")}
-                >
-                  Login
-                </Text>
+        <View>
+          <TextInput
+            style={styles.loginTextField}
+            value={email}
+            onChangeText={text => {
+              setEmail(text);
+            }}
+            placeholder="Email"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            blurOnSubmit={true}
+          />
+          <TextInput
+            style={styles.loginTextField}
+            value={password}
+            onChangeText={text => {
+              setPassword(text);
+            }}
+            placeholder="Password"
+            secureTextEntry={true}
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          <View style={styles.loginButton}>
+            <Text style={styles.loginText} onPress={() => console.log("hi")}>
+              Login
+            </Text>
+          </View>
+          <Text style={styles.otherText}>Or login with:</Text>
+          <View style={{ flexDirection: "row", marginHorizontal: 25 }}>
+            <TouchableWithoutFeedback onPress={() => signInWithFacebook()}>
+              <View style={styles.otherLogin}>
+                <Image
+                  source={require("../assets/images/facebook_login.png")}
+                  style={{
+                    height: "100%",
+                    width: 40,
+                    backgroundColor: "#2553B4",
+                    alignSelf: "center"
+                  }}
+                  resizeMode="contain"
+                />
+                <Text style={styles.snsText}>facebook</Text>
               </View>
-              <Text style={styles.otherText}>Or login with:</Text>
-              <View style={{ flexDirection: "row", marginHorizontal: 25 }}>
-                <TouchableWithoutFeedback onPress={() => signInWithFacebook()}>
-                  <View style={styles.otherLogin}>
-                    <Image
-                      source={require("../assets/images/facebook_login.png")}
-                      style={{
-                        height: "100%",
-                        width: 40,
-                        backgroundColor: "#2553B4",
-                        alignSelf: "center"
-                      }}
-                      resizeMode="contain"
-                    />
-                    <Text style={styles.snsText}>facebook</Text>
-                  </View>
-                </TouchableWithoutFeedback>
-                <TouchableWithoutFeedback
-                  onPress={() => signInWithGoogleAsync()}
-                >
-                  <View style={styles.otherLogin}>
-                    <Image
-                      source={require("../assets/images/google_login.png")}
-                      style={{
-                        height: "80%",
-                        width: 40,
-                        alignSelf: "center"
-                      }}
-                      resizeMode="contain"
-                    />
-                    <Text style={styles.snsText}>google</Text>
-                  </View>
-                </TouchableWithoutFeedback>
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback onPress={() => signInWithGoogleAsync()}>
+              <View style={styles.otherLogin}>
+                <Image
+                  source={require("../assets/images/google_login.png")}
+                  style={{
+                    height: "80%",
+                    width: 40,
+                    alignSelf: "center"
+                  }}
+                  resizeMode="contain"
+                />
+                <Text style={styles.snsText}>google</Text>
               </View>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignSelf: "center",
-                  marginTop: 10
-                }}
+            </TouchableWithoutFeedback>
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              alignSelf: "center",
+              marginTop: 10
+            }}
+          >
+            <TouchableWithoutFeedback
+              onPress={() => navigation.navigate("Signup")}
+            >
+              <Text
+                style={[
+                  styles.otherText,
+                  styles.underline,
+                  {
+                    borderRightWidth: 1,
+                    borderRightColor: "#ADADAD",
+                    paddingRight: 10
+                  }
+                ]}
               >
-                <TouchableWithoutFeedback onPress={()=> navigation.navigate("Signup")}>
-                  <Text
-                    style={[
-                      styles.otherText,
-                      styles.underline,
-                      {
-                        borderRightWidth: 1,
-                        borderRightColor: "#ADADAD",
-                        paddingRight: 10
-                      }
-                    ]}
-                  >
-                    Sign up!
-                  </Text>
-                </TouchableWithoutFeedback>
-                <TouchableWithoutFeedback>
-                  <Text
-                    style={[
-                      styles.otherText,
-                      styles.underline,
-                      { paddingLeft: 10 }
-                    ]}
-                  >
-                    Forgot Password?
-                  </Text>
-                </TouchableWithoutFeedback>
-              </View>
-            </View>
-          </Fragment>
-        ) : (
-          <Fragment>
-            <View style={{ flex: 1, justifyContent: "center" }}>
-              <ActivityIndicator size="large" />
-            </View>
-          </Fragment>
-        )}
+                Sign up!
+              </Text>
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback>
+              <Text
+                style={[
+                  styles.otherText,
+                  styles.underline,
+                  { paddingLeft: 10 }
+                ]}
+              >
+                Forgot Password?
+              </Text>
+            </TouchableWithoutFeedback>
+          </View>
+        </View>
       </KeyboardAvoidingView>
     </View>
   );

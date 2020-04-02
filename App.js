@@ -1,5 +1,5 @@
-import React, {useRef} from "react";
-import { Image } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Image, Text } from "react-native";
 import LoadingScreen from "./pages/LoadingScreen";
 import HomeScreen from "./pages/HomeScreen";
 import SearchScreen from "./pages/SearchScreen";
@@ -14,7 +14,9 @@ import HomeIcon from "./assets/icons/menutab_home.png";
 import SearchIcon from "./assets/icons/menutab_search.png";
 import SettingsIcon from "./assets/icons/menutab_settings.png";
 import firebase from "firebase";
+import * as Font from "expo-font";
 
+import "./firebase";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -22,13 +24,49 @@ const LoadingStack = createStackNavigator();
 const RestaurantStack = createStackNavigator();
 
 const App = () => {
-  console.log(firebase.auth().currentUser)
+  const [login, setLogin] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadFonts();
+    // Listens to any changes in authentication state.
+    firebase.auth().onAuthStateChanged(user => {
+      // console.log(user);
+      checkIfLoggedIn();
+    });
+  }, []);
+  const loadFonts = async () => {
+    await Font.loadAsync({
+      "OpenSans-SemiBold": require("./assets/fonts/OpenSans-SemiBold.ttf"),
+      "OpenSans-Bold": require("./assets/fonts/OpenSans-Bold.ttf"),
+      "OpenSans-Regular": require("./assets/fonts/OpenSans-Regular.ttf"),
+      "Roboto-Light": require("./assets/fonts/Roboto-Light.ttf"),
+      "Roboto-Medium": require("./assets/fonts/Roboto-Medium.ttf"),
+      "Roboto-Bold": require("./assets/fonts/Roboto-Bold.ttf")
+    });
+    setTimeout(()=>setLoading(false), 1500)
+  };
+  const checkIfLoggedIn = () => {
+    if (firebase.auth().currentUser == null) {
+      console.log(null)
+    } else {
+      console.log("good to go");
+      setLogin(true);
+    }
+  };
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Image source={require('./assets/images/splashscreen_example.png')}/>
+      </View>
+    );
+  }
   return (
     <NavigationNativeContainer>
-      <Stack.Navigator initialRouteName="Loading" headerMode="none">
-        <Stack.Screen name="Loading" component={LoadingNavigator} />
-        <Stack.Screen name="Home" component={HomeTabNavigator} />
-        <Stack.Screen name="Restaurant" component={RestaurantScreen} />
+      <Stack.Navigator headerMode="none">
+        {!login ? <Stack.Screen name="Loading" component={LoadingNavigator} />:(
+        <Stack.Screen name="Home" component={HomeTabNavigator, RestaurantNavigator} />
+        )}
       </Stack.Navigator>
     </NavigationNativeContainer>
   );
@@ -83,6 +121,12 @@ const LoadingNavigator = () => {
 };
 
 const RestaurantNavigator = () => {
-
-}
+  return (
+    <RestaurantStack.Navigator headerMode="none">
+      <Stack.Screen name="Home" component={HomeTabNavigator} />
+      <Stack.Screen name="Restaurant" component={RestaurantScreen}/>
+      <Stack.Screen name="Review" component={ReviewScreen}/>
+    </RestaurantStack.Navigator>
+  )
+};
 export default App;
