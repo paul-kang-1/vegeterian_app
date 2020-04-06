@@ -78,7 +78,7 @@ const RestaurantScreen = ({ navigation, route }) => {
                   bottom: 0,
                   padding: 10
                 }}
-                onPress={() => navigation.navigate("Review")}
+                onPress={() => navigation.navigate("Review", {name: dataSource.name})}
               >
                 <Image
                   source={require("../assets/icons/button_WriteReview.png")}

@@ -128,6 +128,7 @@ const HomeScreen = ({ navigation }) => {
 
   onSignOut = () => {
     firebase.auth().signOut();
+    navigation.navigate('Loading')
   };
 
   firebase.auth().onAuthStateChanged(user => {
@@ -145,8 +146,7 @@ const HomeScreen = ({ navigation }) => {
           </Text>
         </View>
         <View style={[styles.vsPick, styles.shadow]}>
-          {/* <Button onPress={() => onSignOut()} title={"Merge Account"} /> */}
-          <Button onPress={() => console.log(navigation)} title={"Merge Account"} />
+          <Button onPress={() => onSignOut()} title={"Merge Account"} />
         </View>
         <View style={styles.titleContainer2}>
           <Text style={styles.pageTitle}>
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
   },
   pageTitle: {
     fontFamily: "Roboto-Light",
-    fontSize: 40,
+    fontSize: 35,
     alignSelf: "flex-end",
     marginBottom: 5
   },

@@ -1,11 +1,10 @@
-import React, { useState, useEffect, Fragment } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
   TextInput,
   View,
   Image,
-  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   TouchableWithoutFeedback
@@ -13,8 +12,6 @@ import {
 import firebase from "firebase";
 import * as Google from "expo-google-app-auth";
 import * as Facebook from "expo-facebook";
-import * as Font from "expo-font";
-// import "../firebase";
 /**
  * Component for displaying the splashscreen / loginscreen
  * @component
@@ -142,8 +139,14 @@ const LoadingScreen = ({ navigation }) => {
           firebase
             .auth()
             .signInWithCredential(credential)
-            .then(function() {
+            .then(function(result) {
+              // console.log(result.user.uid)
               navigation.navigate("Home");
+              return firebase
+                .firestore()
+                .collection("user")
+                .doc(result.user.uid)
+                .set({ new: true });
             })
             .catch(function(error) {
               // Handle Errors here.
@@ -154,6 +157,21 @@ const LoadingScreen = ({ navigation }) => {
         } else {
           console.log("User already signed-in Firebase.");
         }
+      });
+  };
+
+  const onLoginPress = () => {
+    firebase
+      .auth()
+      .signInWithEmailAndPassword(email, password)
+      .then(function() {
+        navigation.navigate("Home");
+      })
+      .catch(function(error) {
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        Alert.alert(`${errorCode} Error: ${errorMessage}`);
       });
   };
 
@@ -195,11 +213,11 @@ const LoadingScreen = ({ navigation }) => {
             autoCapitalize="none"
             autoCorrect={false}
           />
-          <View style={styles.loginButton}>
-            <Text style={styles.loginText} onPress={() => console.log("hi")}>
-              Login
-            </Text>
-          </View>
+          <TouchableWithoutFeedback onPress={() => onLoginPress()}>
+            <View style={styles.loginButton}>
+              <Text style={styles.loginText}>Login</Text>
+            </View>
+          </TouchableWithoutFeedback>
           <Text style={styles.otherText}>Or login with:</Text>
           <View style={{ flexDirection: "row", marginHorizontal: 25 }}>
             <TouchableWithoutFeedback onPress={() => signInWithFacebook()}>
@@ -256,7 +274,9 @@ const LoadingScreen = ({ navigation }) => {
                 Sign up!
               </Text>
             </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback>
+            <TouchableWithoutFeedback
+              onPress={() => navigation.navigate("Forgot")}
+            >
               <Text
                 style={[
                   styles.otherText,

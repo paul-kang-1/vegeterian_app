@@ -7,6 +7,7 @@ import SettingScreen from "./pages/SettingScreen";
 import RestaurantScreen from "./pages/RestaurantScreen";
 import ReviewScreen from "./pages/ReviewScreen";
 import SignupScreen from "./pages/SignupScreen";
+import ForgotPasswordScreen from "./pages/ForgotPasswordScreen"
 import { NavigationNativeContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -42,7 +43,8 @@ const App = () => {
       "OpenSans-Regular": require("./assets/fonts/OpenSans-Regular.ttf"),
       "Roboto-Light": require("./assets/fonts/Roboto-Light.ttf"),
       "Roboto-Medium": require("./assets/fonts/Roboto-Medium.ttf"),
-      "Roboto-Bold": require("./assets/fonts/Roboto-Bold.ttf")
+      "Roboto-Bold": require("./assets/fonts/Roboto-Bold.ttf"),
+      "Roboto-Regular": require("./assets/fonts/Roboto-Regular.ttf")
     });
     setTimeout(()=>setLoading(false), 1500)
   };
@@ -116,6 +118,7 @@ const LoadingNavigator = () => {
     <LoadingStack.Navigator headerMode="none">
       <LoadingStack.Screen name="Loading" component={LoadingScreen} />
       <LoadingStack.Screen name="Signup" component={SignupScreen} />
+      <LoadingStack.Screen name="Forgot" component={ForgotPasswordScreen} />
     </LoadingStack.Navigator>
   );
 };

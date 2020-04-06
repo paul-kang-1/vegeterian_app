@@ -129,15 +129,15 @@ const SearchScreen = ({ navigation }) => {
         clearTimeout(regionTimeout);
         let regionTimeout = setTimeout(() => {
           if (currentIndex !== index) {
-            console.log(
-              `current: ${currentIndex}, new: ${index}, ${markers[index].id}`
-            );
+            // console.log(
+            //   `current: ${currentIndex}, new: ${index}, ${markers[index].id}`
+            // );
             currentIndex = index;
             const coordinate = {
               latitude: markers[index].data().coords["U"],
               longitude: markers[index].data().coords["k"]
             };
-            console.log(coordinate);
+            // console.log(coordinate);
             mapRef.current.animateToRegion(
               {
                 ...coordinate,
@@ -488,15 +488,15 @@ const styles = StyleSheet.create({
     height: 40
   },
   redoSearchButtonText: {
-    color: "white",
+    color: "black",
     fontSize: 12,
-    fontFamily: "Roboto-Light"
+    fontFamily: "Roboto-Medium"
   },
   redoSearchButton: {
     position: "absolute",
     top: 70,
     height: 30,
-    backgroundColor: "#464646",
+    backgroundColor: "white",
     justifyContent: "center",
     paddingHorizontal: 20,
     borderRadius: 15

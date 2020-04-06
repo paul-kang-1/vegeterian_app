@@ -4,21 +4,18 @@ import {
     Text,
     StyleSheet
 } from "react-native";
-import Constants from "expo-constants";
 
-const SignupScreen = ({navigation}) => (
+const ForgotPasswordScreen = (props) => (
     <View style={styles.container}>
-        <Text>SignupScreen</Text>
+        <Text>ForgotPasswordScreen</Text>
     </View>
     )
-export default SignupScreen;
+export default ForgotPasswordScreen;
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: Constants.statusBarHeight,
-        backgroundColor: 'white'
+        justifyContent: 'center'
     }
 });
