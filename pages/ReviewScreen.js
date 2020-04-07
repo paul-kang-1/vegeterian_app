@@ -5,7 +5,8 @@ import {
   Image,
   StyleSheet,
   TouchableWithoutFeedback,
-  TextInput
+  TextInput,
+  ScrollView
 } from "react-native";
 import Constants from "expo-constants";
 import StarRating from "react-native-star-rating";
@@ -14,6 +15,22 @@ const ReviewScreen = ({ navigation, route }) => {
   const { name } = route.params;
   const [rating, setRating] = useState(5);
   const [review, setReview] = useState("");
+  const [images, setImages] = useState([]);
+
+  function imgCallBack(data) {
+    setImages(data);
+  }
+
+  function renderImage(item, i) {
+    return (
+      <Image
+        style={{ height: 100, width: 100, margin: 2.5 }}
+        source={{ uri: item.uri }}
+        key={i}
+      />
+    );
+  }
+  function onSaveButtonPress() {}
 
   return (
     <View style={styles.container}>
@@ -43,14 +60,41 @@ const ReviewScreen = ({ navigation, route }) => {
           onChangeText={text => setReview(text)}
           multiline={true}
           textAlignVertical="top"
+          placeholder={"Type your review here!"}
+          maxLength={10000}
         ></TextInput>
-        <TouchableWithoutFeedback onPress={()=>navigation.navigate("ImageBrowser")}>
-          <Image
-            source={require("../assets/icons/button_addImage.png")}
-            style={{ width: "15%" }}
-            resizeMode="contain"
-          />
-        </TouchableWithoutFeedback>
+        <Text style={styles.letterCount}>{review.length}/10000 Characters</Text>
+        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <TouchableWithoutFeedback
+            onPress={() =>
+              navigation.navigate("ImageBrowser", {
+                imgCallBack: imgCallBack
+              })
+            }
+          >
+            <Image
+              source={require("../assets/icons/button_addImage.png")}
+              style={styles.buttonImage}
+              resizeMode="contain"
+            />
+          </TouchableWithoutFeedback>
+          <TouchableWithoutFeedback onPress={() => onSaveButtonPress()}>
+            <Image
+              source={require("../assets/icons/button_saveReview.png")}
+              style={styles.buttonImage}
+              resizeMode="contain"
+            />
+          </TouchableWithoutFeedback>
+        </View>
+        {images.length ? (
+          <View>
+            <ScrollView horizontal={true}>
+              {images.map((item, i) => renderImage(item, i))}
+            </ScrollView>
+          </View>
+        ) : (
+          <View></View>
+        )}
       </View>
     </View>
   );
@@ -59,12 +103,13 @@ export default ReviewScreen;
 
 const styles = StyleSheet.create({
   container: {
+    minHeight: 600,
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     marginTop: Constants.statusBarHeight,
     padding: 15,
-    backgroundColor: "#FF4D12"
+    backgroundColor: "white"
   },
   sectionTitle: {
     width: "100%",
@@ -74,7 +119,7 @@ const styles = StyleSheet.create({
   sectionTitleText: {
     fontFamily: "Roboto-Bold",
     fontSize: 20,
-    color: "white"
+    color: "#FF4D12"
   },
   cancelText: {
     fontFamily: "Roboto-Light",
@@ -84,6 +129,8 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     flex: 1,
     width: "100%",
+    borderColor: "#FF4D12",
+    borderWidth: 1.2,
     marginTop: 10,
     borderRadius: 15,
     padding: 15
@@ -99,7 +146,8 @@ const styles = StyleSheet.create({
     paddingBottom: 10
   },
   reviewTextInput: {
-    flex: 0.8,
+    flex: 1,
+    minHeight: 250,
     width: "100%",
     borderWidth: 0.5,
     borderColor: "#ADADAD",
@@ -107,5 +155,17 @@ const styles = StyleSheet.create({
     padding: 15,
     fontFamily: "Roboto-Regular",
     fontSize: 15
+  },
+  buttonImage: {
+    width: 75,
+    height: 75,
+    marginRight: 10,
+    alignSelf: "center",
+    marginTop: 10
+  },
+  letterCount: {
+    alignSelf: "center",
+    fontFamily: "Roboto-Light",
+    color: "#949191"
   }
 });

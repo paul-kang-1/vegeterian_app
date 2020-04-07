@@ -34,13 +34,13 @@ const SettingScreen = ({ route, navigation }) => {
         setBackClickCount(0);
       }, 1000);
     } else {
-      console.log("go Back");
+      // console.log("go Back");
       navigation.pop();
     }
   };
 
   const handleBackButton = () => {
-    console.log(`backclick: ${backClickCount}`);
+    // console.log(`backclick: ${backClickCount}`);
     backClickCount == 1 ? BackHandler.exitApp() : backButtonEffect();
     return true;
   };
@@ -62,6 +62,17 @@ const SettingScreen = ({ route, navigation }) => {
         </Text>
       </View>
       <View style={styles.divider} />
+      <TouchableWithoutFeedback>
+        <View style={{ alignSelf: "flex-start", marginLeft: 25 }}>
+          <Text style={{ fontFamily: "Roboto-Regular", fontSize: 18 }}>
+            My Favourites!
+          </Text>
+          <Image
+            source={require("../assets/icons/button_favorite_toggled.png")}
+            style={{ width: 50, height: 50, borderWidth: 1 }}
+          />
+        </View>
+      </TouchableWithoutFeedback>
     </View>
   );
 };

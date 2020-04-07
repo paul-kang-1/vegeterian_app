@@ -10,7 +10,7 @@ import * as ImageManipulator from "expo-image-manipulator";
 import { ImageBrowser } from "expo-image-picker-multiple";
 import Constants from "expo-constants";
 
-const ImageBrowserScreen = ({ navigation }) => {
+const ImageBrowserScreen = ({ navigation, route }) => {
   const [count, setCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [submit, setSubmit] = useState();
@@ -22,9 +22,14 @@ const ImageBrowserScreen = ({ navigation }) => {
   );
   const updateHandler = (count, onSubmit) => {
     setCount(count);
-    setSubmit(()=>onSubmit);
-    console.log(onSubmit)
+    setSubmit(() => onSubmit);
+    console.log(onSubmit);
   };
+
+  function goBack(photos) {
+    navigation.goBack();
+    route.params.imgCallBack(photos);
+  }
 
   const imagesCallback = callback => {
     callback
@@ -33,14 +38,14 @@ const ImageBrowserScreen = ({ navigation }) => {
         const cPhotos = [];
         for (let photo of photos) {
           const pPhoto = await _processImageAsync(photo.uri);
-          console.log(pPhoto.uri);
+          //   console.log(pPhoto.uri);
           cPhotos.push({
             uri: pPhoto.uri,
             name: photo.filename,
             type: "image/jpg"
           });
         }
-        navigation.navigate("Review", { photos: cPhotos });
+        goBack(cPhotos);
       })
       .catch(e => console.log(e))
       .finally(() => {
@@ -63,7 +68,7 @@ const ImageBrowserScreen = ({ navigation }) => {
         <TouchableWithoutFeedback onPress={() => navigation.goBack()}>
           <Text style={styles.headerText}>Cancel</Text>
         </TouchableWithoutFeedback>
-        <Text style={styles.headerText}>Selected {count} Images</Text>
+        <Text style={styles.headerText}>Selected {count}/5 Images</Text>
         {loading ? (
           <React.Fragment>
             <View style={styles.loading}>
@@ -81,7 +86,7 @@ const ImageBrowserScreen = ({ navigation }) => {
 
       <View style={styles.flex}>
         <ImageBrowser
-          max={4}
+          max={5}
           onChange={updateHandler}
           callback={imagesCallback}
           renderSelectedComponent={renderSelectedComponent}
@@ -125,9 +130,9 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     marginHorizontal: "6%"
   },
-  loading:{
-      width: '20%', 
-      justifyContent: 'center',
-      alignItems: "center"
+  loading: {
+    width: "20%",
+    justifyContent: "center",
+    alignItems: "center"
   }
 });

@@ -209,7 +209,8 @@ const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     width: DEVICE_WIDTH,
-    marginTop: Constants.statusBarHeight
+    marginTop: Constants.statusBarHeight,
+    backgroundColor: 'white'
   },
   contents: {
     width: DEVICE_WIDTH,
