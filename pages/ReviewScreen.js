@@ -9,13 +9,11 @@ import {
 } from "react-native";
 import Constants from "expo-constants";
 import StarRating from "react-native-star-rating";
-import ImagePicker from "react-native-image-crop-picker";
 
 const ReviewScreen = ({ navigation, route }) => {
   const { name } = route.params;
   const [rating, setRating] = useState(5);
   const [review, setReview] = useState("");
-  const [imageList, setImageList] = useState([]);
 
   return (
     <View style={styles.container}>
@@ -46,8 +44,12 @@ const ReviewScreen = ({ navigation, route }) => {
           multiline={true}
           textAlignVertical="top"
         ></TextInput>
-        <TouchableWithoutFeedback>
-          <Image source={require("../assets/icons/button_addImage.png")} style={{width: '15%'}} resizeMode='contain' />
+        <TouchableWithoutFeedback onPress={()=>navigation.navigate("ImageBrowser")}>
+          <Image
+            source={require("../assets/icons/button_addImage.png")}
+            style={{ width: "15%" }}
+            resizeMode="contain"
+          />
         </TouchableWithoutFeedback>
       </View>
     </View>

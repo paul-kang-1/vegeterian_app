@@ -6,6 +6,7 @@ import SearchScreen from "./pages/SearchScreen";
 import SettingScreen from "./pages/SettingScreen";
 import RestaurantScreen from "./pages/RestaurantScreen";
 import ReviewScreen from "./pages/ReviewScreen";
+import ImageBrowserScreen from "./pages/ImageBrowserScreen";
 import SignupScreen from "./pages/SignupScreen";
 import ForgotPasswordScreen from "./pages/ForgotPasswordScreen"
 import { NavigationNativeContainer } from "@react-navigation/native";
@@ -127,9 +128,10 @@ const RestaurantNavigator = () => {
   return (
     <RestaurantStack.Navigator headerMode="none">
       <Stack.Screen name="Home" component={HomeTabNavigator} />
-      <Stack.Screen name="Restaurant" component={RestaurantScreen}/>
-      <Stack.Screen name="Review" component={ReviewScreen}/>
+      <Stack.Screen name="Restaurant" component={RestaurantScreen} />
+      <Stack.Screen name="Review" component={ReviewScreen} />
+      <Stack.Screen name="ImageBrowser" component={ImageBrowserScreen} />
     </RestaurantStack.Navigator>
-  )
+  );
 };
 export default App;
