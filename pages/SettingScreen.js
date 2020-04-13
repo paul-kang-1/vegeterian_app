@@ -63,16 +63,45 @@ const SettingScreen = ({ route, navigation }) => {
       </View>
       <View style={styles.divider} />
       <TouchableWithoutFeedback>
-        <View style={{ alignSelf: "flex-start", marginLeft: 25 }}>
+        <View
+          style={{
+            marginLeft: 25,
+            flexDirection: "row",
+            width: "95%",
+            justifyContent: "space-between"
+          }}
+        >
           <Text style={{ fontFamily: "Roboto-Regular", fontSize: 18 }}>
-            My Favourites!
+            My Favourites
           </Text>
           <Image
             source={require("../assets/icons/button_favorite_toggled.png")}
-            style={{ width: 50, height: 50, borderWidth: 1 }}
+            style={{ width: 25, height: 25, marginRight: 30 }}
+            resizeMode="contain"
           />
         </View>
       </TouchableWithoutFeedback>
+      <View style={styles.divider} />
+      <TouchableWithoutFeedback>
+        <View
+          style={{
+            marginLeft: 25,
+            flexDirection: "row",
+            width: "95%",
+            justifyContent: "space-between"
+          }}
+        >
+          <Text style={{ fontFamily: "Roboto-Regular", fontSize: 18 }}>
+            My Reviews
+          </Text>
+          <Image
+            source={require("../assets/icons/icon_comment.png")}
+            style={{ width: 25, height: 25, marginRight: 30 }}
+            resizeMode="contain"
+          />
+        </View>
+      </TouchableWithoutFeedback>
+      <View style={styles.divider} />
     </View>
   );
 };
@@ -97,7 +126,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignSelf: "center",
     marginTop: 30,
-    paddingHorizontal: 30,
+    paddingHorizontal: 20,
     width: "100%"
   },
   userName: {
@@ -109,7 +138,7 @@ const styles = StyleSheet.create({
   divider: {
     width: "90%",
     backgroundColor: "#ADADAD",
-    height: 1.5,
+    height: 1,
     marginVertical: 20
   },
   editIcon: {

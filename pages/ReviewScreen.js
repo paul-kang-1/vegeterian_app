@@ -6,16 +6,21 @@ import {
   StyleSheet,
   TouchableWithoutFeedback,
   TextInput,
-  ScrollView
+  ScrollView,
+  ToastAndroid,
+  Platform,
+  AlertIOS
 } from "react-native";
 import Constants from "expo-constants";
 import StarRating from "react-native-star-rating";
+import firebase from "firebase";
 
 const ReviewScreen = ({ navigation, route }) => {
-  const { name } = route.params;
+  const { name: restaurantName } = route.params;
   const [rating, setRating] = useState(5);
   const [review, setReview] = useState("");
   const [images, setImages] = useState([]);
+  const uid = firebase.auth().currentUser.uid;
 
   function imgCallBack(data) {
     setImages(data);
@@ -30,7 +35,100 @@ const ReviewScreen = ({ navigation, route }) => {
       />
     );
   }
-  function onSaveButtonPress() {}
+
+  async function uploadImage(uri, imageName) {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    //***THE IMAGE UPLOAD PATH IS CURRENTLY SET TO A TEST PATH***
+    let ref = firebase
+      .storage()
+      .ref()
+      .child(`images/${restaurantName}/${imageName}`);
+    return ref.put(blob);
+  }
+
+  async function getImageUrlList() {
+    let result = [];
+    for (let item of images) {
+      await uploadImage(item.uri, item.name)
+        .then(snapshot => {
+          return snapshot.ref.getDownloadURL();
+        })
+        .then(downloadURL => {
+          console.log(`download available at ${downloadURL}`);
+          result.push(downloadURL);
+        })
+        .catch(err => {
+          console.error(err);
+        });
+    }
+    return Promise.all(result);
+  }
+
+  async function addReviewForUserDoc(ref) {
+    firebase
+      .firestore()
+      .collection("users")
+      .doc(uid)
+      .update({
+        reviews: firebase.firestore.FieldValue.arrayUnion(ref.id)
+      })
+      .catch(err => {
+        console.error(err);
+      });
+  }
+
+  async function addReviewForReviewDoc(ref, urlList) {
+    ref
+      .set({
+        review: review,
+        photos: urlList,
+        rating: rating,
+        userID: uid,
+        likes: 0,
+        time: firebase.firestore.FieldValue.serverTimestamp(),
+        restaurant: restaurantName
+      })
+      .catch(err => {
+        console.error(err);
+      });
+  }
+
+  async function addReview(urlList) {
+    const reviewRef = firebase
+      .firestore()
+      .collection("reviews")
+      .doc();
+    await addReviewForUserDoc(reviewRef, uid);
+    await addReviewForReviewDoc(reviewRef, urlList, uid);
+    return;
+  }
+
+  function onSaveButtonPress() {
+    if (review.length < 40)
+      notifyMessage("The review should be at least \n40 characters long 😔");
+    else {
+      navigation.goBack();
+      getImageUrlList()
+        .then(urlList => addReview(urlList))
+        .then(() => notifyMessage("Review saved! 🥰"))
+        .catch(err => {
+          console.error(err);
+        });
+    }
+  }
+
+  function notifyMessage(msg) {
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        msg,
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      AlertIOS.alert(msg);
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -41,7 +139,7 @@ const ReviewScreen = ({ navigation, route }) => {
         </TouchableWithoutFeedback>
       </View>
       <View style={styles.sectionCard}>
-        <Text style={styles.restaurantTitle}>{name}</Text>
+        <Text style={styles.restaurantTitle}>{restaurantName}</Text>
         <View style={{ paddingHorizontal: 40, paddingVertical: 10 }}>
           <StarRating
             disabled={false}

@@ -43,8 +43,8 @@ const LoadingScreen = ({ navigation }) => {
       firebase
         .auth()
         .signInWithCredential(credential)
-        .then(function() {
-          navigation.navigate("Home");
+        .then(function(result) {
+          createUserDoc(result);
         })
         .catch(function(error) {
           /* 
@@ -63,6 +63,8 @@ const LoadingScreen = ({ navigation }) => {
               "Please sign-in with a different option and add different sign-in options\
                in the app settings!"
             );
+          } else {
+            console.error(error);
           }
         });
     }
@@ -135,30 +137,39 @@ const LoadingScreen = ({ navigation }) => {
             googleUser.idToken,
             googleUser.accessToken
           );
-          // Sign in with credential from the Google user.
           firebase
             .auth()
             .signInWithCredential(credential)
-            .then(function(result) {
-              // console.log(result.user.uid)
-              navigation.navigate("Home");
-              return firebase
-                .firestore()
-                .collection("user")
-                .doc(result.user.uid)
-                .set({ new: true });
-            })
-            .catch(function(error) {
-              // Handle Errors here.
-              var errorCode = error.code;
-              var errorMessage = error.message;
-              console.log(`${errorCode} Error: ${errorMessage}`);
-            });
+            .then(result => createUserDoc(result))
+            .catch(err => console.error(err));
+          // Sign in with credential from the Google user.
         } else {
           console.log("User already signed-in Firebase.");
         }
       });
   };
+
+  function createUserDoc(result) {
+    navigation.navigate("Home");
+    let userDocRef = firestore()
+      .collection("users")
+      .doc(result.user.uid);
+    userDocRef
+      .get()
+      .then(doc => {
+        if (!doc.exists) {
+          userDocRef.set({
+            name: result.user.displayName,
+            nickName: null,
+            reviews: [],
+            favorites: [],
+            thumbnail: null
+          });
+        } else {
+        }
+      })
+      .catch(error => console.error(error));
+  }
 
   const onLoginPress = () => {
     firebase

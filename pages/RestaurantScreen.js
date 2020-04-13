@@ -18,7 +18,6 @@ const RestaurantScreen = ({ navigation, route }) => {
   const [dataSource, setDataSource] = useState(null);
   const [favorite, setFavorite] = useState(false);
   const { id, ref } = route.params;
-  let schedule;
   const fetchAdditionalInfo = id => {
     var docRef = ref.doc(id);
     docRef.get().then(function(doc) {
@@ -27,25 +26,11 @@ const RestaurantScreen = ({ navigation, route }) => {
       setDataSource(result);
     });
   };
+
   function getWeekSchedule(schedule) {
     const { sun, mon, tue, wed, thu, fri, sat } = schedule;
-    let weekday = [mon, tue, wed, thu, fri, sat, sun];
+    let weekday = [sun, mon, tue, wed, thu, fri, sat];
     return weekday;
-  }
-
-  function groupSchedule(scheduleArray) {
-    const result = [0];
-    for (let i = 1; i < scheduleArray.length; i++) {
-      if (!isEqual(scheduleArray[i - 1], scheduleArray[i])) {
-        result.push(i);
-      }
-    }
-    console.log(result);
-    return result;
-  }
-
-  function isEqual(a, b) {
-    return (JSON.stringify(a) == JSON.stringify(b));
   }
 
   function displayRating(n) {
@@ -58,9 +43,9 @@ const RestaurantScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     if (dataSource != null) {
-      schedule = getWeekSchedule(dataSource["schedule"]);
-      console.log(schedule);
-      groupSchedule(schedule);
+      console.log(dataSource["schedule"])
+      const scheduleArray = getWeekSchedule(dataSource["schedule"]);
+      console.log(scheduleArray);
     }
   });
 
@@ -140,7 +125,7 @@ const RestaurantScreen = ({ navigation, route }) => {
                 <Keyword keywords={dataSource.type} />
                 <MapView
                   style={{
-                    height: 200,
+                    height: 130,
                     width: "100%",
                     marginVertical: 10,
                     marginTop: 0
