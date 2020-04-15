@@ -1994,6 +1994,11 @@
     wcwidth "^1.0.1"
     ws "^1.1.0"
 
+"@react-native-community/clipboard@^1.2.1":
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/@react-native-community/clipboard/-/clipboard-1.2.1.tgz#ecf3e348dacd4ce9be25da9f0443bd748afda774"
+  integrity sha512-w/KLmYPeGuYZXxslQWinlYJdNvSFoOV2KIq7VGj93VEn8HEIZVKcOSIHJMZMh8jugAjsvVCcmkffKk7aXTVfvQ==
+
 "@react-native-community/masked-view@0.1.5":
   version "0.1.5"
   resolved "https://registry.yarnpkg.com/@react-native-community/masked-view/-/masked-view-0.1.5.tgz#25421be6cd943a4b1660b62cfbcd45be8891462c"
@@ -6154,6 +6159,13 @@ react-native-button@^2.3.0:
   integrity sha512-4siaJlpOLeL9fAhX8VU3cnUfcGLe3E2zABDWSKxkF+NiYOd+AnKeYY29WXlV8hXhCFo+Ry7E+alrJ6zjZLTSfg==
   dependencies:
     prop-types "^15.5.10"
+
+react-native-collapsible@^1.5.2:
+  version "1.5.2"
+  resolved "https://registry.yarnpkg.com/react-native-collapsible/-/react-native-collapsible-1.5.2.tgz#544616dc04a71870508dc707049544a805402993"
+  integrity sha512-pmETueIStEhKY93yO/nh+G9jyMZaZta9xyUO51KP+p/tefXDtDG8Ok9QELld0Fk/kiDOldvG5Tjy+JcdS8Sdxw==
+  dependencies:
+    prop-types "^15.6.2"
 
 react-native-debugger@^1.1.0:
   version "1.1.0"

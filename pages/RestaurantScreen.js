@@ -7,51 +7,72 @@ import {
   Text,
   Image,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   Linking
 } from "react-native";
 import MapView from "react-native-maps";
 import BGCarousel, { DEVICE_WIDTH, DEVICE_HEIGHT } from "./BGCarousel";
 import Constants from "expo-constants";
 import Keyword from "./Keyword";
+import GetWeekSchedule from "./Schedule";
+import { Clipboard } from "react-native";
+import firebase from "firebase";
 
 const RestaurantScreen = ({ navigation, route }) => {
   const [dataSource, setDataSource] = useState(null);
   const [favorite, setFavorite] = useState(false);
+  const [isCollapsed, setCollapsed] = useState(true);
   const { id, ref } = route.params;
-  const fetchAdditionalInfo = id => {
+  function fetchAdditionalInfo(id) {
     var docRef = ref.doc(id);
-    docRef.get().then(function(doc) {
-      var result = doc.data().d;
-      result.coordinates = doc.data().l;
-      setDataSource(result);
-    });
-  };
+    docRef
+      .get()
+      .then(function(doc) {
+        var result = doc.data().d;
+        result.coordinates = doc.data().l;
+        return result;
+      })
+      .then(result => {
+        return fetchReviews(result);
+      })
+      .then(data => setDataSource(data))
+      .catch(e => console.error(e));
+  }
 
-  function getWeekSchedule(schedule) {
-    const { sun, mon, tue, wed, thu, fri, sat } = schedule;
-    let weekday = [sun, mon, tue, wed, thu, fri, sat];
-    return weekday;
+  async function fetchReviews(result) {
+    const reviews = [];
+    await firebase
+      .firestore()
+      .collection("reviews")
+      .where("restaurant", "==", result.name)
+      .get()
+      .then(function(querySnapshot) {
+        querySnapshot.forEach(function(doc) {
+          // doc.data() is never undefined for query doc snapshots
+          reviews.push(doc.data());
+        });
+      });
+    result.reviews = reviews;
+    return result;
   }
 
   function displayRating(n) {
     return n % 1 ? n : n + ".0";
   }
 
-  useEffect(() => {
-    fetchAdditionalInfo(id);
-  }, []);
+  function copyToClipboard() {
+    if (dataSource != null)
+      Clipboard.setString(dataSource.address.address_full);
+  }
 
   useEffect(() => {
-    if (dataSource != null) {
-      console.log(dataSource["schedule"])
-      const scheduleArray = getWeekSchedule(dataSource["schedule"]);
-      console.log(scheduleArray);
-    }
-  });
+    fetchAdditionalInfo(id);
+    console.log(favorite);
+  }, []);
 
   return (
     <View style={styles.mainContainer}>
-      <ScrollView style={styles.scrollViewContainer}>
+      <ScrollView style={{ flex: 1 }}>
         {dataSource ? (
           <View style={styles.contents}>
             <View style={{ flex: 2 }}>
@@ -63,7 +84,9 @@ const RestaurantScreen = ({ navigation, route }) => {
                   bottom: 0,
                   padding: 10
                 }}
-                onPress={() => navigation.navigate("Review", {name: dataSource.name})}
+                onPress={() =>
+                  navigation.navigate("Review", { name: dataSource.name })
+                }
               >
                 <Image
                   source={require("../assets/icons/button_WriteReview.png")}
@@ -112,23 +135,13 @@ const RestaurantScreen = ({ navigation, route }) => {
                 </Text>
               </View>
 
-              <View
-                style={{
-                  borderTopColor: "#C4C4C4",
-                  borderTopWidth: 1,
-                  margin: 10,
-                  marginTop: 10,
-                  paddingTop: 10,
-                  paddingHorizontal: 5
-                }}
-              >
+              <View style={styles.lowerContainer}>
                 <Keyword keywords={dataSource.type} />
                 <MapView
                   style={{
                     height: 130,
                     width: "100%",
-                    marginVertical: 10,
-                    marginTop: 0
+                    marginBottom: 10
                   }}
                   initialRegion={{
                     latitude: dataSource.coordinates["U"],
@@ -147,32 +160,63 @@ const RestaurantScreen = ({ navigation, route }) => {
                 </MapView>
                 <Text
                   style={{
-                    fontFamily: "OpenSans-Regular",
+                    fontFamily: "Roboto-Light",
                     fontSize: 15,
                     alignSelf: "center"
                   }}
                 >
                   {dataSource.address.address_full}
                 </Text>
-                <TouchableOpacity
-                  onPress={() => Linking.openURL(`tel:${dataSource.phone}`)}
-                  style={styles.callButton}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between"
+                  }}
                 >
-                  <Image
-                    source={require("../assets/icons/phone.png")}
-                    style={{ width: 20, height: 20, marginRight: 15 }}
-                    resizeMode="contain"
-                  />
-                  <Text
-                    style={{ fontFamily: "OpenSans-Regular", fontSize: 15 }}
+                  <TouchableWithoutFeedback
+                    onPress={() => Linking.openURL(`tel:${dataSource.phone}`)}
                   >
-                    Make a Phone Call
-                  </Text>
-                </TouchableOpacity>
-                <Text style={{ fontFamily: "OpenSans-Bold", fontSize: 20 }}>
-                  Open Hours
+                    <View style={styles.callButton}>
+                      <Image
+                        source={require("../assets/icons/phone.png")}
+                        style={{ width: 20, height: 20, marginRight: 15 }}
+                        resizeMode="contain"
+                      />
+                      <Text
+                        style={{ fontFamily: "Roboto-Light", fontSize: 15 }}
+                      >
+                        Call
+                      </Text>
+                    </View>
+                  </TouchableWithoutFeedback>
+                  <TouchableWithoutFeedback onPress={() => copyToClipboard()}>
+                    <View style={styles.callButton}>
+                      <Text
+                        style={{ fontFamily: "Roboto-Light", fontSize: 15 }}
+                      >
+                        📋 Copy Address
+                      </Text>
+                    </View>
+                  </TouchableWithoutFeedback>
+                </View>
+                <Text style={styles.sectionTitleText}>Open Hours</Text>
+                <GetWeekSchedule
+                  schedule={dataSource["schedule"]}
+                  onStateChange={() => setCollapsed(!isCollapsed)}
+                  isCollapsed={isCollapsed}
+                ></GetWeekSchedule>
+                <Text style={styles.sectionTitleText}>
+                  Reviews ({dataSource ? dataSource.reviews.length : ""})
                 </Text>
-                <Text>{"data"}</Text>
+                {dataSource && dataSource.reviews.length === 0 ? (
+                  <View style={{marginVertical: 10}}>
+                    <Text style={{ fontFamily: "Roboto-Light", fontSize: 15 }}>
+                      🥗 Be The First to Write a Review 🥗
+                    </Text>
+                  </View>
+                ) : (
+                  <View style={styles.reviewContainer}></View>
+                )}
               </View>
             </View>
           </View>
@@ -195,16 +239,11 @@ const styles = StyleSheet.create({
     flex: 1,
     width: DEVICE_WIDTH,
     marginTop: Constants.statusBarHeight,
-    backgroundColor: 'white'
+    backgroundColor: "white"
   },
   contents: {
     width: DEVICE_WIDTH,
-    flex: 1,
-    height: 1.5 * DEVICE_HEIGHT
-  },
-  scrollViewContainer: {
-    height: 1.5 * DEVICE_HEIGHT,
-    width: "100%"
+    flex: 1
   },
   restaurantTitleText: {
     fontSize: 35,
@@ -220,13 +259,6 @@ const styles = StyleSheet.create({
     fontFamily: "Roboto-Light",
     color: "#FF4D12"
   },
-  statusText: {
-    marginLeft: 5,
-    color: "#ADADAD",
-    paddingBottom: 2,
-    fontFamily: "OpenSans-Regular",
-    fontSize: 13
-  },
   statusIcon: { height: 15, width: 20, marginLeft: 10 },
   statusContainer: {
     flexDirection: "row",
@@ -235,13 +267,30 @@ const styles = StyleSheet.create({
     marginLeft: 5
   },
   callButton: {
-    width: "100%",
-    borderColor: "red",
+    width: "48.5%",
+    borderColor: "#FF4D12",
     borderWidth: 1,
     marginVertical: 15,
-    padding: 15,
+    padding: 10,
     flexDirection: "row",
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
+    paddingVertical: 15
+  },
+  lowerContainer: {
+    borderTopColor: "#C4C4C4",
+    borderTopWidth: 1,
+    margin: 10,
+    marginTop: 10,
+    paddingTop: 10,
+    paddingHorizontal: 5
+  },
+  sectionTitleText: { fontFamily: "OpenSans-Bold", fontSize: 20 },
+  reviewContainer: {
+    height: 300,
+    borderWidth: 1,
+    width: "100%",
+    marginTop: 10,
+    borderColor: "#FF4D12"
   }
 });

@@ -34,7 +34,7 @@ class BGCarousel extends React.Component {
           renderItem={({ item }) => (
             <Image
               source={{ uri: item }}
-              style={{ height: "100%", width: DEVICE_WIDTH}}
+              style={{ height: DEVICE_HEIGHT*0.3, width: DEVICE_WIDTH}}
               key={{item}}
             />
           )}
@@ -45,7 +45,7 @@ class BGCarousel extends React.Component {
             <View
               key={image}
               style={
-                [styles.whiteCircle, { opacity: i === selectedIndex ? 0.5 : 1 }]
+                [styles.whiteCircle, { opacity: i === selectedIndex ? 1 : 0.5 }]
               }
             />
           ))}
