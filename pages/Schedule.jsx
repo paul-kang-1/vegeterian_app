@@ -75,7 +75,7 @@ function getDaySchedule(scheduleToArray) {
 }
 
 function todaySchedule(today, todayToString) {
-  if (today === null) {
+  if (today === null || today === "") {
     return `${todayToString}: Closed`;
   } else if (today.length === 2) {
     return `${todayToString}:\nOpen: ${numToTime(today[0])} - ${numToTime(

@@ -41,13 +41,16 @@ const RestaurantScreen = ({ navigation, route }) => {
         return result;
       })
       .then(result => {
-        return fetchReviews(result);
+        return addReviewToResult(result);
       })
-      .then(data => setDataSource(data))
+      .then(data => {
+        setDataSource(data);
+        fetchFavorite(data.name);
+      })
       .catch(e => console.error(e));
   }
 
-  async function fetchReviews(result) {
+  async function addReviewToResult(result) {
     const reviews = [];
     await firebase
       .firestore()
@@ -104,13 +107,13 @@ const RestaurantScreen = ({ navigation, route }) => {
     }
   }
 
-  async function fetchFavorite() {
+  async function fetchFavorite(name) {
     userDocRef
       .get()
       .then(doc => {
         return doc.data().favorites;
       })
-      .then(favorites => setFavorite(favorites.includes(dataSource.name)));
+      .then(favorites => setFavorite(favorites.includes(name)));
   }
 
   async function changeFavorite(newFavorite) {
@@ -143,7 +146,6 @@ const RestaurantScreen = ({ navigation, route }) => {
 
   useEffect(() => {
     fetchAdditionalInfo(id);
-    fetchFavorite();
   }, []);
 
   return (
