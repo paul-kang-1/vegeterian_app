@@ -105,9 +105,7 @@ export default GetWeekSchedule;
 const styles = StyleSheet.create({
   container: {
     marginVertical: 10,
-    borderColor: "#FF4D12",
-    borderWidth: 1,
-    padding: 10
+    marginLeft: 10
   },
   scheduleFont: { fontSize: 15, fontFamily: "Roboto-Light", paddingBottom: 5 },
   headerFont: { fontSize: 15, fontFamily: "Roboto-Regular" }

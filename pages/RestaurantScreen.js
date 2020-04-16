@@ -8,7 +8,10 @@ import {
   Image,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  Linking
+  Linking,
+  ToastAndroid,
+  Platform,
+  AlertIOS
 } from "react-native";
 import MapView from "react-native-maps";
 import BGCarousel, { DEVICE_WIDTH, DEVICE_HEIGHT } from "./BGCarousel";
@@ -23,6 +26,11 @@ const RestaurantScreen = ({ navigation, route }) => {
   const [favorite, setFavorite] = useState(false);
   const [isCollapsed, setCollapsed] = useState(true);
   const { id, ref } = route.params;
+  const userUid = firebase.auth().currentUser.uid;
+  const userDocRef = firebase
+    .firestore()
+    .collection("users")
+    .doc(userUid);
   function fetchAdditionalInfo(id) {
     var docRef = ref.doc(id);
     docRef
@@ -65,9 +73,77 @@ const RestaurantScreen = ({ navigation, route }) => {
       Clipboard.setString(dataSource.address.address_full);
   }
 
+  function renderReviews() {
+    if (dataSource.reviews.length === 0) {
+      return (
+        <View style={{ marginVertical: 10 }}>
+          <Text style={{ fontFamily: "Roboto-Light", fontSize: 15 }}>
+            🥗 Be The First to Write a Review 🥗
+          </Text>
+        </View>
+      );
+    } else {
+      return dataSource.reviews.map((val, i) => {
+        return (
+          <View
+            key={i}
+            style={{
+              borderBottomWidth: 0.5,
+              borderColor: "#C4C4C4",
+              padding: 10,
+              flexDirection: "row"
+            }}
+          >
+            <Text style={styles.reviewRatingText}>
+              {displayRating(val.rating)}
+            </Text>
+            <Text style={styles.reviewText}>{val.review}</Text>
+          </View>
+        );
+      });
+    }
+  }
+
+  async function fetchFavorite() {
+    userDocRef
+      .get()
+      .then(doc => {
+        return doc.data().favorites;
+      })
+      .then(favorites => setFavorite(favorites.includes(dataSource.name)));
+  }
+
+  async function changeFavorite(newFavorite) {
+    userDocRef
+      .update({
+        favorites: newFavorite
+          ? firebase.firestore.FieldValue.arrayUnion(dataSource.name)
+          : firebase.firestore.FieldValue.arrayRemove(dataSource.name)
+      })
+      .then(result => {
+        const msg = `✔️ Successfully ${
+          newFavorite ? "added to" : "removed from"
+        } your favorites!`;
+        notifyMessage(msg);
+        setFavorite(newFavorite);
+      });
+  }
+
+  function notifyMessage(msg) {
+    if (Platform.OS === "android") {
+      ToastAndroid.showWithGravity(
+        msg,
+        ToastAndroid.SHORT,
+        ToastAndroid.CENTER
+      );
+    } else {
+      AlertIOS.alert(msg);
+    }
+  }
+
   useEffect(() => {
     fetchAdditionalInfo(id);
-    console.log(favorite);
+    fetchFavorite();
   }, []);
 
   return (
@@ -78,12 +154,7 @@ const RestaurantScreen = ({ navigation, route }) => {
             <View style={{ flex: 2 }}>
               <BGCarousel images={dataSource.images} />
               <TouchableOpacity
-                style={{
-                  position: "absolute",
-                  right: 0,
-                  bottom: 0,
-                  padding: 10
-                }}
+                style={styles.reviewButtonContainer}
                 onPress={() =>
                   navigation.navigate("Review", { name: dataSource.name })
                 }
@@ -94,14 +165,8 @@ const RestaurantScreen = ({ navigation, route }) => {
                 />
               </TouchableOpacity>
               <TouchableOpacity
-                style={{
-                  position: "absolute",
-                  left: 0,
-                  bottom: 0,
-                  padding: 10,
-                  paddingBottom: 5
-                }}
-                onPress={() => setFavorite(!favorite)}
+                style={styles.starContainer}
+                onPress={() => changeFavorite(!favorite)}
               >
                 {favorite ? (
                   <Image
@@ -208,15 +273,13 @@ const RestaurantScreen = ({ navigation, route }) => {
                 <Text style={styles.sectionTitleText}>
                   Reviews ({dataSource ? dataSource.reviews.length : ""})
                 </Text>
-                {dataSource && dataSource.reviews.length === 0 ? (
-                  <View style={{marginVertical: 10}}>
-                    <Text style={{ fontFamily: "Roboto-Light", fontSize: 15 }}>
-                      🥗 Be The First to Write a Review 🥗
-                    </Text>
-                  </View>
-                ) : (
-                  <View style={styles.reviewContainer}></View>
-                )}
+                <View
+                  style={{
+                    marginVertical: 10
+                  }}
+                >
+                  {dataSource ? renderReviews() : null}
+                </View>
               </View>
             </View>
           </View>
@@ -275,7 +338,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 15
+    paddingVertical: 15,
+    borderRadius: 10
   },
   lowerContainer: {
     borderTopColor: "#C4C4C4",
@@ -287,10 +351,34 @@ const styles = StyleSheet.create({
   },
   sectionTitleText: { fontFamily: "OpenSans-Bold", fontSize: 20 },
   reviewContainer: {
-    height: 300,
     borderWidth: 1,
     width: "100%",
     marginTop: 10,
     borderColor: "#FF4D12"
+  },
+  reviewText: {
+    fontFamily: "Roboto-Light",
+    fontSize: 15,
+    flex: 1,
+    flexWrap: "wrap"
+  },
+  starContainer: {
+    position: "absolute",
+    left: 0,
+    bottom: 0,
+    padding: 10,
+    paddingBottom: 5
+  },
+  reviewRatingText: {
+    fontFamily: "OpenSans-Bold",
+    fontSize: 30,
+    color: "#FF4D12",
+    marginRight: 10
+  },
+  reviewButtonContainer: {
+    position: "absolute",
+    right: 0,
+    bottom: 0,
+    padding: 10
   }
 });
