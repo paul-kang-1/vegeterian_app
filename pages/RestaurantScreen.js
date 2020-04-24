@@ -14,7 +14,7 @@ import {
   AlertIOS
 } from "react-native";
 import MapView from "react-native-maps";
-import BGCarousel, { DEVICE_WIDTH, DEVICE_HEIGHT } from "./BGCarousel";
+import BGCarousel, { DEVICE_WIDTH } from "./BGCarousel";
 import Constants from "expo-constants";
 import Keyword from "./Keyword";
 import GetWeekSchedule from "./Schedule";
@@ -287,7 +287,7 @@ const RestaurantScreen = ({ navigation, route }) => {
           </View>
         ) : (
           <View style={styles.contents}>
-            <View style={{ flex: 2, justifyContent: "center" }}>
+            <View style={{ flex: 2, justifyContent: "center", paddingTop: 150 }}>
               <ActivityIndicator size="large" />
             </View>
             <View style={{ flex: 7 }}></View>

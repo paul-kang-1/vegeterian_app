@@ -3,24 +3,20 @@
     "name": "V's Choice",
     "slug": "vs-choice",
     "privacy": "public",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
+    "platforms": ["ios", "android", "web"],
     "version": "1.0.0",
     "orientation": "portrait",
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "bundleIdentifier": "com.vegetourian.vspick"
     },
     "android": {
       "package": "com.vegeterian.vschoice"
-    }
+    },
+    "icon": "./assets/images/logo_vspick.png"
   }
 }
