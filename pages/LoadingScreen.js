@@ -269,7 +269,7 @@ const LoadingScreen = ({ navigation }) => {
             }}
           >
             <TouchableWithoutFeedback
-              onPress={() => navigation.navigate("Signup")}
+              onPress={() => navigation.navigate("Terms")}
             >
               <Text
                 style={[

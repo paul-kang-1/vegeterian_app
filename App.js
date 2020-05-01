@@ -9,6 +9,7 @@ import ReviewScreen from "./pages/ReviewScreen";
 import ImageBrowserScreen from "./pages/ImageBrowserScreen";
 import SignupScreen from "./pages/SignupScreen";
 import ForgotPasswordScreen from "./pages/ForgotPasswordScreen"
+import Terms from "./pages/Terms"
 import { NavigationNativeContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -120,6 +121,7 @@ const LoadingNavigator = () => {
       <LoadingStack.Screen name="Loading" component={LoadingScreen} />
       <LoadingStack.Screen name="Signup" component={SignupScreen} />
       <LoadingStack.Screen name="Forgot" component={ForgotPasswordScreen} />
+      <LoadingStack.Screen name="Terms" component={Terms}/>
     </LoadingStack.Navigator>
   );
 };
