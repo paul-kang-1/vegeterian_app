@@ -7,7 +7,7 @@ import {
   Image,
   Alert,
   KeyboardAvoidingView,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
 } from "react-native";
 import firebase from "firebase";
 import * as Google from "expo-google-app-auth";
@@ -35,7 +35,7 @@ const LoadingScreen = ({ navigation }) => {
     const { type, token } = await Facebook.logInWithReadPermissionsAsync(
       "199623754607347",
       {
-        permissions: ["email", "public_profile"]
+        permissions: ["email", "public_profile"],
       }
     );
     if (type === "success") {
@@ -43,10 +43,10 @@ const LoadingScreen = ({ navigation }) => {
       firebase
         .auth()
         .signInWithCredential(credential)
-        .then(function(result) {
+        .then(function (result) {
           createUserDoc(result);
         })
-        .catch(function(error) {
+        .catch(function (error) {
           /* 
           For cases where the user have already signed up through a different provider with
           the same e-mail. However, accounts with Gmail is an edge case, since Google provider
@@ -106,7 +106,7 @@ const LoadingScreen = ({ navigation }) => {
           "386677764344-4f2lfkvaupm96uih0rg1afr5qh4o1fb0.apps.googleusercontent.com",
         iosClientId:
           "386677764344-oeoovf93253f509banm2rgl32l54fkj0.apps.googleusercontent.com",
-        scopes: ["profile", "email"]
+        scopes: ["profile", "email"],
       });
 
       if (result.type === "success") {
@@ -124,11 +124,11 @@ const LoadingScreen = ({ navigation }) => {
    * @method
    * @param {*} googleUser
    */
-  const onSignIn = googleUser => {
+  const onSignIn = (googleUser) => {
     // We need to register an Observer on Firebase Auth to make sure auth is initialized.
     var unsubscribe = firebase
       .auth()
-      .onAuthStateChanged(function(firebaseUser) {
+      .onAuthStateChanged(function (firebaseUser) {
         unsubscribe();
         // Check if we are already signed-in Firebase with the correct user.
         if (!isUserEqual(googleUser, firebaseUser)) {
@@ -140,8 +140,8 @@ const LoadingScreen = ({ navigation }) => {
           firebase
             .auth()
             .signInWithCredential(credential)
-            .then(result => createUserDoc(result))
-            .catch(err => console.error(err));
+            .then((result) => createUserDoc(result))
+            .catch((err) => console.error(err));
           // Sign in with credential from the Google user.
         } else {
           console.log("User already signed-in Firebase.");
@@ -151,34 +151,38 @@ const LoadingScreen = ({ navigation }) => {
 
   function createUserDoc(result) {
     navigation.navigate("Home");
-    let userDocRef = firestore()
-      .collection("users")
-      .doc(result.user.uid);
+    let userDocRef = firestore().collection("users").doc(result.user.uid);
     userDocRef
       .get()
-      .then(doc => {
+      .then((doc) => {
         if (!doc.exists) {
           userDocRef.set({
             name: result.user.displayName,
             nickName: null,
             reviews: [],
             favorites: [],
-            thumbnail: null
+            thumbnail: null,
+            notification: false,
           });
         } else {
         }
       })
-      .catch(error => console.error(error));
+      .catch((error) => console.error(error));
   }
 
   const onLoginPress = () => {
     firebase
       .auth()
       .signInWithEmailAndPassword(email, password)
-      .then(function() {
-        navigation.navigate("Home");
+      .then((result) => {
+        result.user.emailVerified
+          ? navigation.navigate("Home")
+          : Alert.alert(
+              "Email Verification Required",
+              "Please complete your email verification!"
+            );
       })
-      .catch(function(error) {
+      .catch(function (error) {
         // Handle Errors here.
         var errorCode = error.code;
         var errorMessage = error.message;
@@ -204,7 +208,7 @@ const LoadingScreen = ({ navigation }) => {
           <TextInput
             style={styles.loginTextField}
             value={email}
-            onChangeText={text => {
+            onChangeText={(text) => {
               setEmail(text);
             }}
             placeholder="Email"
@@ -216,7 +220,7 @@ const LoadingScreen = ({ navigation }) => {
           <TextInput
             style={styles.loginTextField}
             value={password}
-            onChangeText={text => {
+            onChangeText={(text) => {
               setPassword(text);
             }}
             placeholder="Password"
@@ -239,7 +243,7 @@ const LoadingScreen = ({ navigation }) => {
                     height: "100%",
                     width: 40,
                     backgroundColor: "#2553B4",
-                    alignSelf: "center"
+                    alignSelf: "center",
                   }}
                   resizeMode="contain"
                 />
@@ -253,7 +257,7 @@ const LoadingScreen = ({ navigation }) => {
                   style={{
                     height: "80%",
                     width: 40,
-                    alignSelf: "center"
+                    alignSelf: "center",
                   }}
                   resizeMode="contain"
                 />
@@ -265,7 +269,7 @@ const LoadingScreen = ({ navigation }) => {
             style={{
               flexDirection: "row",
               alignSelf: "center",
-              marginTop: 10
+              marginTop: 10,
             }}
           >
             <TouchableWithoutFeedback
@@ -278,8 +282,8 @@ const LoadingScreen = ({ navigation }) => {
                   {
                     borderRightWidth: 1,
                     borderRightColor: "#ADADAD",
-                    paddingRight: 10
-                  }
+                    paddingRight: 10,
+                  },
                 ]}
               >
                 Sign up!
@@ -292,7 +296,7 @@ const LoadingScreen = ({ navigation }) => {
                 style={[
                   styles.otherText,
                   styles.underline,
-                  { paddingLeft: 10 }
+                  { paddingLeft: 10 },
                 ]}
               >
                 Forgot Password?
@@ -311,14 +315,14 @@ const styles = StyleSheet.create({
   underline: { textDecorationLine: "underline" },
   container: {
     flex: 1,
-    backgroundColor: "white"
+    backgroundColor: "white",
   },
   logoContainer: { flex: 0.75, justifyContent: "flex-end", marginBottom: 50 },
   logo: {
     paddingBottom: 30,
     width: 220,
     height: 220,
-    alignSelf: "center"
+    alignSelf: "center",
   },
   loginTextField: {
     width: "85%",
@@ -329,7 +333,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 20,
     fontSize: 18,
-    fontFamily: "Roboto-Light"
+    fontFamily: "Roboto-Light",
   },
   loginButton: {
     width: "85%",
@@ -339,12 +343,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: 10,
-    marginBottom: 25
+    marginBottom: 25,
   },
   loginText: {
     fontFamily: "Roboto-Light",
     fontSize: 18,
-    color: "white"
+    color: "white",
   },
   otherLogin: {
     flex: 1,
@@ -354,17 +358,17 @@ const styles = StyleSheet.create({
     borderColor: "#ADADAD",
     marginVertical: 10,
     marginHorizontal: 5,
-    justifyContent: "flex-start"
+    justifyContent: "flex-start",
   },
   otherText: {
     alignSelf: "center",
     fontFamily: "Roboto-Light",
-    color: "#ADADAD"
+    color: "#ADADAD",
   },
   snsText: {
     alignSelf: "center",
     fontFamily: "Roboto-Medium",
     color: "#ADADAD",
-    marginLeft: 25
-  }
+    marginLeft: 25,
+  },
 });

@@ -5,13 +5,14 @@ import {
   StyleSheet,
   TextInput,
   TouchableWithoutFeedback,
+  Alert,
 } from "react-native";
 import Constants from "expo-constants";
 import Input from "./Input";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import firebase from "firebase";
 
-const SignupScreen = ({ navigation }) => {
+const SignupScreen = ({ navigation, route }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,6 +20,7 @@ const SignupScreen = ({ navigation }) => {
   const [pwConfirm, setPWConfirm] = useState("");
   const [isUserNameValid, setUserNameValid] = useState(false);
   const [isEmailValid, setEmailValid] = useState(false);
+  const { notification } = route.params;
 
   const userNameMsg = [
     "Good to Go!",
@@ -57,20 +59,58 @@ const SignupScreen = ({ navigation }) => {
   function checkFields() {
     var pw = password === pwConfirm;
     var pwv = pwValidate.every((e) => e);
-    console.log(isUserNameValid, isEmailValid, pw, pwValidate);
+    //console.log(isUserNameValid, isEmailValid, pw, pwValidate);
     return isUserNameValid && isEmailValid && pw && pwv;
   }
 
-  function addUser(username, email, password){
+  function addUser(userName, email, password) {
     firebase
       .auth()
       .createUserWithEmailAndPassword(email, password)
+      .then((result) => {
+        var user = result.user;
+        user.updateProfile({
+          displayName: userName,
+          photoURL: null,
+        });
+        createUserDoc(user, userName);
+        return user;
+      })
+      .then((user) => user.sendEmailVerification())
+      .then(() =>{
+        navigation.navigate("Loading")
+        Alert.alert(
+          "Verify Your E-mail!",
+          "An email has been sent to your registered address for verification. Please verify your email before you sign in!"
+        )}
+      )
       .catch(function (error) {
         // Handle Errors here.
         var errorCode = error.code;
         var errorMessage = error.message;
         // ...
+        Alert.alert(errorCode, errorMessage);
       });
+  }
+
+  function createUserDoc(user, userName) {
+    let userDocRef = firebase.firestore().collection("users").doc(user.uid);
+    userDocRef
+      .get()
+      .then((doc) => {
+        if (!doc.exists) {
+          userDocRef.set({
+            name: userName,
+            nickName: null,
+            reviews: [],
+            favorites: [],
+            thumbnail: null,
+            notification: notification,
+          });
+        } else {
+        }
+      })
+      .catch((error) => console.error(error));
   }
 
   return (
@@ -158,7 +198,6 @@ const SignupScreen = ({ navigation }) => {
               "(?=.*[A-Z])", // uppercase letter
             ]}
             onValidation={(isValid) => {
-              console.log("isvalid,", isValid);
               setPWValidate(isValid);
             }}
           />
@@ -220,13 +259,7 @@ const SignupScreen = ({ navigation }) => {
       </KeyboardAwareScrollView>
       <TouchableWithoutFeedback
         onPress={() => {
-          checkFields()
-            ? navigation.navigate("Terms", {
-                userName: name,
-                email: email,
-                password: password,
-              })
-            : null;
+          checkFields() ? addUser(name, email, password) : null;
         }}
       >
         <View

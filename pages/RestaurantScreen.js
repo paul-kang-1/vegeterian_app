@@ -205,6 +205,7 @@ const RestaurantScreen = ({ navigation, route }) => {
               <View style={styles.lowerContainer}>
                 <Keyword keywords={dataSource.type} />
                 <MapView
+                onPress={()=>navigation.navigate("Map")}
                   style={{
                     height: 130,
                     width: "100%",

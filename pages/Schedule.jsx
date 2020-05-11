@@ -4,11 +4,11 @@ import {
   Text,
   StyleSheet,
   TouchableWithoutFeedback,
-  Image
+  Image,
 } from "react-native";
 import Collapsible from "react-native-collapsible";
 
-const GetWeekSchedule = props => {
+const GetWeekSchedule = (props) => {
   const { sun, mon, tue, wed, thu, fri, sat } = props.schedule;
   const scheduleToArray = [sun, mon, tue, wed, thu, fri, sat];
   const result = getDaySchedule(scheduleToArray);
@@ -34,7 +34,7 @@ const GetWeekSchedule = props => {
           </View>
         )}
       </TouchableWithoutFeedback>
-      <Collapsible collapsed={props.isCollapsed}>
+      <Collapsible collapsed={props.isCollapsed} align="top">
         <View>
           {result.content.map((val, i) => {
             return (
@@ -57,7 +57,7 @@ function getDaySchedule(scheduleToArray) {
     "Wednesday",
     "Thursday",
     "Friday",
-    "Saturday"
+    "Saturday",
   ];
   let d = new Date().getDay();
   const today = scheduleToArray[d];
@@ -98,15 +98,18 @@ function numToTime(num) {
     : hour + ":" + min + " " + timePeriod;
 }
 
-const splitAt = index => x => [x.slice(0, index), x.slice(index)];
+const splitAt = (index) => (x) => [x.slice(0, index), x.slice(index)];
 
 export default GetWeekSchedule;
 
 const styles = StyleSheet.create({
   container: {
     marginVertical: 10,
-    marginLeft: 10
+    borderWidth: 0.5,
+    padding: 10,
+    borderColor: "#ADADAD",
+    borderRadius: 10,
   },
   scheduleFont: { fontSize: 15, fontFamily: "Roboto-Light", paddingBottom: 5 },
-  headerFont: { fontSize: 15, fontFamily: "Roboto-Regular" }
+  headerFont: { fontSize: 15, fontFamily: "Roboto-Regular" },
 });

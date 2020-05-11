@@ -13,7 +13,7 @@ import Constants from "expo-constants";
 
 const SettingScreen = ({ route, navigation }) => {
   const [backClickCount, setBackClickCount] = useState(0);
-
+  const userDoc = firebase.firestore().collection("users").get()
   const user = firebase.auth().currentUser;
   const photoUrl = user.photoURL;
   const name = user.displayName;
@@ -47,7 +47,7 @@ const SettingScreen = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
       <TouchableWithoutFeedback
-        onPress={() => console.log(navigation.isFocused())}
+        onPress={() => console.log(user)}
       >
         <Image
           source={require("../assets/icons/button_edit.png")}

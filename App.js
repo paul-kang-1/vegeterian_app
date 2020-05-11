@@ -9,6 +9,7 @@ import ReviewScreen from "./pages/ReviewScreen";
 import ImageBrowserScreen from "./pages/ImageBrowserScreen";
 import SignupScreen from "./pages/SignupScreen";
 import ForgotPasswordScreen from "./pages/ForgotPasswordScreen"
+import MapScreen from "./pages/MapScreen"
 import Terms from "./pages/Terms"
 import { NavigationNativeContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -51,11 +52,18 @@ const App = () => {
     setTimeout(()=>setLoading(false), 1500)
   };
   const checkIfLoggedIn = () => {
-    if (firebase.auth().currentUser == null) {
+    var user = firebase.auth().currentUser;
+    var flag = true;
+    if (user === null) {
       console.log(null)
     } else {
-      console.log("good to go");
-      setLogin(true);
+      user.providerData.forEach(function(profile){
+        if(profile.providerId === "password" && !user.emailVerified){
+          flag = false;
+        }
+      })
+      flag?
+      setLogin(true): null;
     }
   };
   if (loading) {
@@ -133,6 +141,7 @@ const RestaurantNavigator = () => {
       <Stack.Screen name="Restaurant" component={RestaurantScreen} />
       <Stack.Screen name="Review" component={ReviewScreen} />
       <Stack.Screen name="ImageBrowser" component={ImageBrowserScreen} />
+      <Stack.Screen name ="Map" component={MapScreen}/>
     </RestaurantStack.Navigator>
   );
 };

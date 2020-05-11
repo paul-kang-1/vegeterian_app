@@ -10,7 +10,10 @@ import {
   Dimensions,
   TextInput,
   BackHandler,
-  ToastAndroid
+  ToastAndroid,
+  Alert,
+  PanResponder,
+  Platform,
 } from "react-native";
 import firebase from "firebase";
 import { GeoFirestore } from "geofirestore";
@@ -25,36 +28,91 @@ const CARD_WIDTH = width / 1.5;
 
 const SearchScreen = ({ navigation }) => {
   const [backClickCount, setBackClickCount] = useState(0);
-
-  const [errorMessage, setErrorMessage] = useState("");
   const [myLocation, setMyLocation] = useState();
   let newLocation;
   let currentIndex = 0;
   let animation = new Animated.Value(0);
+  let position = new Animated.ValueXY();
+  let positionRef = useRef(position);
   let timeouts = [];
   const [markers, setMarkers] = useState();
   const [search, setSearch] = useState("");
+  const [noRestaurants, setNoRestaurants] = useState(false);
   const mapRef = useRef();
   const scrollRef = useRef();
   // const [interpolations, setInterpolations] = useState();
   const firestore = firebase.firestore();
   const geofirestore = new GeoFirestore(firestore);
   const geocollection = geofirestore.collection("restaurants");
-  const ref = firebase.firestore().collection("restaurants");
+  const dbRef = firebase.firestore().collection("restaurants");
+
+  const panResponder = useRef(
+    PanResponder.create({
+      // Ask to be the responder:
+      onStartShouldSetPanResponder: (evt, gestureState) => true,
+      onStartShouldSetPanResponderCapture: (evt, gestureState) => true,
+      onMoveShouldSetPanResponder: (evt, gestureState) => true,
+      onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
+      onPanResponderMove: (evt, gestureState) => {
+        // The most recent move distance is gestureState.move{X,Y}
+        // The accumulated gesture distance since becoming responder is
+        // gestureState.d{x,y}
+        const currentOffset = getCurrentOffset(gestureState.moveY);
+        positionRef.current.setValue({ y: setHeight(currentOffset) });
+      },
+      onPanResponderTerminationRequest: (evt, gestureState) => false,
+      onPanResponderRelease: (evt, gestureState) => {
+        const currentOffset = getCurrentOffset(gestureState.moveY);
+        if (-240 <= currentOffset && currentOffset <= -120) {
+          console.log("lower half");
+          startAnimation(false);
+        } else if (-120 < currentOffset && currentOffset <= 0) {
+          console.log("upper half");
+          startAnimation(true);
+        }
+      },
+      onShouldBlockNativeResponder: (evt, gestureState) => true,
+    })
+  ).current;
+
+  function getCurrentOffset(moveY) {
+    return height - moveY - (CARD_HEIGHT + 70);
+  }
+
+  const startAnimation = (isUpperHalf) => {
+    isUpperHalf
+      ? Animated.timing(positionRef.current, {
+          toValue: 0,
+          duration: 200,
+        }).start()
+      : Animated.timing(positionRef.current, {
+          toValue: -CARD_HEIGHT-20,
+          duration: 200,
+        }).start(() => {
+          console.log(position.y);
+        });
+  };
+
+  function setHeight(currentOffset) {
+    if (currentOffset < -CARD_HEIGHT) return -CARD_HEIGHT;
+    else if (-CARD_HEIGHT <= currentOffset && currentOffset <= 0) {
+      return currentOffset;
+    } else {
+      return 0;
+    }
+  }
 
   const getLocationAsync = async () => {
     let { status } = await Permissions.askAsync(Permissions.LOCATION);
     if (status !== "granted") {
-      setErrorMessage({
-        errorMessage: "Permission to access location was denied"
-      });
+      Alert.alert("Permission to access location was denied");
     }
     let location = await Location.getCurrentPositionAsync({});
     setMyLocation({
       latitude: location.coords.latitude,
-      longitude: location.coords.longitude
+      longitude: location.coords.longitude,
     });
-    initScrollPosition();
+    noRestaurants ? null : initScrollPosition();
     if (location) {
       const { latitude, longitude } = location.coords;
       makeQuery({ latitude: latitude, longitude: longitude });
@@ -67,7 +125,7 @@ const SearchScreen = ({ navigation }) => {
       initScrollPosition();
       setMyLocation({
         latitude: newLocation.latitude,
-        longitude: newLocation.longitude
+        longitude: newLocation.longitude,
       });
       makeQuery(newLocation);
     }
@@ -76,7 +134,7 @@ const SearchScreen = ({ navigation }) => {
   function initScrollPosition() {
     scrollRef.current.getNode().scrollTo({
       x: 0,
-      animated: true
+      animated: true,
     });
   }
 
@@ -86,9 +144,16 @@ const SearchScreen = ({ navigation }) => {
         location.latitude,
         location.longitude
       ),
-      radius: 2
+      radius: 2,
     });
-    query.get().then(value => {
+    query.get().then((value) => {
+      if (value.docs.length === 0) {
+        // Alert.alert(
+        //   "No restaurants around you 😞",
+        //   "Try searching on a different location!"
+        // );
+        setNoRestaurants(true);
+      }
       // All GeoDocument returned by GeoQuery, like the GeoDocument added above
       console.log(`${value.docs.length} restaurants near you!`);
       value.docs.sort(compare);
@@ -109,10 +174,8 @@ const SearchScreen = ({ navigation }) => {
     return 0;
   }
 
-
   useEffect(() => {
     getLocationAsync();
-    console.log("useeffect");
   }, []);
 
   useEffect(() => {
@@ -135,14 +198,14 @@ const SearchScreen = ({ navigation }) => {
             currentIndex = index;
             const coordinate = {
               latitude: markers[index].data().coords["U"],
-              longitude: markers[index].data().coords["k"]
+              longitude: markers[index].data().coords["k"],
             };
             // console.log(coordinate);
             mapRef.current.animateToRegion(
               {
                 ...coordinate,
                 latitudeDelta: 0.0194,
-                longitudeDelta: 0.022099
+                longitudeDelta: 0.022099,
               },
               550
             );
@@ -191,6 +254,7 @@ const SearchScreen = ({ navigation }) => {
     backClickCount == 1 ? BackHandler.exitApp() : backButtonEffect();
     return true;
   };
+
   return (
     <View style={styles.container}>
       {myLocation ? (
@@ -198,13 +262,13 @@ const SearchScreen = ({ navigation }) => {
           <MapView
             style={{
               flex: 1,
-              width: "100%"
+              width: "100%",
             }}
             region={{
               latitude: myLocation.latitude,
               longitude: myLocation.longitude,
               latitudeDelta: 0.0022,
-              longitudeDelta: 0.0221
+              longitudeDelta: 0.0221,
             }}
             rotateEnabled={false}
             mapPadding={{ top: 0, left: 0, right: 0, bottom: CARD_HEIGHT + 50 }}
@@ -216,7 +280,7 @@ const SearchScreen = ({ navigation }) => {
             <MapView.Marker
               coordinate={{
                 latitude: myLocation.latitude,
-                longitude: myLocation.longitude
+                longitude: myLocation.longitude,
               }}
             >
               <Image
@@ -229,7 +293,7 @@ const SearchScreen = ({ navigation }) => {
                   const inputRange = [
                     (index - 1) * (CARD_WIDTH + 20),
                     index * (CARD_WIDTH + 20),
-                    (index + 1) * (CARD_WIDTH + 20)
+                    (index + 1) * (CARD_WIDTH + 20),
                   ];
                   const scaleStyle = {
                     transform: [
@@ -237,17 +301,17 @@ const SearchScreen = ({ navigation }) => {
                         scale: animation.interpolate({
                           inputRange,
                           outputRange: [1, 1.5, 1],
-                          extrapolate: "clamp"
-                        })
-                      }
-                    ]
+                          extrapolate: "clamp",
+                        }),
+                      },
+                    ],
                   };
                   return (
                     <MapView.Marker
                       key={index}
                       coordinate={{
                         latitude: marker.data().coords["U"],
-                        longitude: marker.data().coords["k"]
+                        longitude: marker.data().coords["k"],
                       }}
                       title={marker.id}
                     >
@@ -261,21 +325,10 @@ const SearchScreen = ({ navigation }) => {
                 })
               : null}
           </MapView>
-          <TouchableWithoutFeedback onPress={() => getLocationAsync()}>
-            <Image
-              source={require("../assets/icons/button_myLocation.png")}
-              style={styles.myLocationButtonImage}
-            />
-          </TouchableWithoutFeedback>
-          <TouchableWithoutFeedback onPress={()=> console.log(navigation.isFocused())}>
-            <Image
-              source={require("../assets/icons/button_filter.png")}
-              style={styles.filterButtonImage}
-            />
-          </TouchableWithoutFeedback>
+
           <TextInput
             style={[styles.search, styles.shadow]}
-            onChangeText={text => {
+            onChangeText={(text) => {
               setSearch(text);
             }}
             placeholder="Search.."
@@ -296,95 +349,140 @@ const SearchScreen = ({ navigation }) => {
           </View>
         </React.Fragment>
       )}
-      <View style={styles.bottomCollapsible}>
-        <View style={styles.bottomCollapsibleHandle} />
-        <Animated.ScrollView
-          horizontal
-          scrollEventThrottle={1}
-          showsHorizontalScrollIndicator={false}
-          decelerationRate={0.9}
-          snapToInterval={CARD_WIDTH + 20} //your element width
-          snapToAlignment={"center"}
-          centerContent={true}
-          snapToStart={false}
-          onScroll={Animated.event(
-            [
-              {
-                nativeEvent: {
-                  contentOffset: {
-                    x: animation
-                  }
-                }
-              }
-            ],
-            { useNativeDriver: true }
-          )}
-          style={styles.scrollView}
-          contentContainerStyle={styles.endPadding}
-          ref={scrollRef}
+      <Animated.View style={[{ bottom: positionRef.current.y }, styles.bottomCollapsible]}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            width: "100%",
+          }}
         >
-          {markers
-            ? markers.map((marker, index) => {
-                return (
-                  <TouchableWithoutFeedback
-                    onPress={() => {
-                      navigation.navigate("Restaurant", {
-                        id: marker.id,
-                        ref: ref
-                      });
-                    }}
-                    key={index}
-                  >
-                    <View style={[styles.card, styles.shadow]}>
-                      <Image
-                        source={{
-                          uri: marker.data().images[
-                            Math.floor(
-                              Math.random() * marker.data().images.length
-                            )
-                          ]
+          <View style={{ width: 40, height: 40 }}></View>
+          <TouchableWithoutFeedback onPress={() => console.log("filterButton")}>
+            <Image
+              source={require("../assets/icons/button_filter.png")}
+              style={styles.filterButtonImage}
+            />
+          </TouchableWithoutFeedback>
+          <TouchableWithoutFeedback onPress={() => getLocationAsync()}>
+            <Image
+              source={require("../assets/icons/button_myLocation.png")}
+              style={styles.myLocationButtonImage}
+              resizeMode="cover"
+            />
+          </TouchableWithoutFeedback>
+        </View>
+        <View
+          style={{
+            width: "100%",
+            height: CARD_HEIGHT + 70,
+            backgroundColor: "rgba(255,255,255,0.9)",
+            borderTopLeftRadius: 35,
+            borderTopRightRadius: 35,
+          }}
+        >
+          <View
+            style={{
+              width: "100%",
+              alignItems: "center",
+              paddingBottom: CARD_HEIGHT*0.1,
+              borderWidth: 1,
+              borderColor: 'rgba(255,255,255,0)'
+            }}
+            {...panResponder.panHandlers}
+          >
+            <View style={styles.bottomCollapsibleHandle}></View>
+          </View>
+          {
+            <Animated.ScrollView
+              horizontal
+              scrollEventThrottle={1}
+              showsHorizontalScrollIndicator={false}
+              decelerationRate={0.9}
+              snapToInterval={CARD_WIDTH + 20} //your element width
+              snapToAlignment={"center"}
+              centerContent={true}
+              snapToStart={false}
+              onScroll={Animated.event(
+                [
+                  {
+                    nativeEvent: {
+                      contentOffset: {
+                        x: animation,
+                      },
+                    },
+                  },
+                ],
+                { useNativeDriver: true }
+              )}
+              style={styles.scrollView}
+              contentContainerStyle={styles.endPadding}
+              ref={scrollRef}
+            >
+              {markers
+                ? markers.map((marker, index) => {
+                    return (
+                      <TouchableWithoutFeedback
+                        onPress={() => {
+                          navigation.navigate("Restaurant", {
+                            id: marker.id,
+                            ref: dbRef,
+                          });
                         }}
-                        style={styles.cardImage}
-                        resizeMode="cover"
-                      />
-                      <View style={{ flexDirection: "row" }}>
-                        <View style={styles.textContent}>
-                          <Text numberOfLines={1} style={styles.cardtitle}>
-                            {marker.id}
-                          </Text>
-                          <Text
-                            numberOfLines={1}
-                            style={styles.cardDescription}
-                          >
-                            {marker.data().address["address_depth2"]},{" "}
-                            {displayDistance(marker.distance)}
-                          </Text>
+                        key={index}
+                      >
+                        <View style={[styles.card, styles.shadow]}>
+                          <Image
+                            source={{
+                              uri: marker.data().images[
+                                Math.floor(
+                                  Math.random() * marker.data().images.length
+                                )
+                              ],
+                            }}
+                            style={styles.cardImage}
+                            resizeMode="cover"
+                          />
+                          <View style={{ flexDirection: "row" }}>
+                            <View style={styles.textContent}>
+                              <Text numberOfLines={1} style={styles.cardtitle}>
+                                {marker.id}
+                              </Text>
+                              <Text
+                                numberOfLines={1}
+                                style={styles.cardDescription}
+                              >
+                                {marker.data().address["address_depth2"]},{" "}
+                                {displayDistance(marker.distance)}
+                              </Text>
+                            </View>
+                            <View style={styles.ratingContainer}>
+                              <Text style={styles.ratingText}>
+                                {displayRating(marker.data().rating)}
+                              </Text>
+                            </View>
+                          </View>
                         </View>
-                        <View style={styles.ratingContainer}>
-                          <Text style={styles.ratingText}>
-                            {displayRating(marker.data().rating)}
-                          </Text>
-                        </View>
-                      </View>
-                    </View>
-                  </TouchableWithoutFeedback>
-                );
-              })
-            : null}
-        </Animated.ScrollView>
-      </View>
+                      </TouchableWithoutFeedback>
+                    );
+                  })
+                : null}
+            </Animated.ScrollView>
+          }
+        </View>
+      </Animated.View>
     </View>
   );
 };
 export default SearchScreen;
 
-const elevationShadowStyle = elevation => {
+const elevationShadowStyle = (elevation) => {
   return {
     elevation,
     shadowColor: "black",
     shadowOffset: { width: 0, height: 0.5 * elevation },
     shadowOpacity: 0.3,
-    shadowRadius: 0.8 * elevation
+    shadowRadius: 0.8 * elevation,
   };
 };
 
@@ -394,7 +492,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: Constants.statusBarHeight
+    marginTop: Constants.statusBarHeight,
   },
   scrollView: {
     position: "absolute",
@@ -402,42 +500,38 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     paddingVertical: 10,
-    paddingLeft: width / 6 - 10
+    paddingLeft: width / 6 - 10,
   },
   endPadding: {
-    paddingRight: width - CARD_WIDTH
+    paddingRight: width - CARD_WIDTH,
   },
   card: {
     backgroundColor: "#FFF",
     marginHorizontal: 10,
-    shadowColor: "#000",
-    shadowRadius: 5,
-    shadowOpacity: 0.3,
-    shadowOffset: { x: 2, y: -2 },
     height: CARD_HEIGHT,
     width: CARD_WIDTH,
     overflow: "hidden",
     borderRadius: 15,
-    marginVertical: 15
+    marginVertical: 15,
   },
   cardImage: {
     flex: 3,
     width: "100%",
     height: "100%",
-    alignSelf: "center"
+    alignSelf: "center",
   },
   textContent: {
     flex: 1,
-    padding: 10
+    padding: 10,
   },
   cardtitle: {
     fontSize: 18,
     marginTop: 0,
-    fontFamily: "Roboto-Medium"
+    fontFamily: "Roboto-Medium",
   },
   cardDescription: {
     fontSize: 12,
-    color: "#444"
+    color: "#444",
   },
   search: {
     position: "absolute",
@@ -449,48 +543,37 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     color: "white",
     fontFamily: "Roboto-Light",
-    fontSize: 16
+    fontSize: 16,
   },
   bottomCollapsible: {
     position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingVertical: 10,
-    backgroundColor: "rgba(255,255,255,0.9)",
-    height: CARD_HEIGHT + 70,
-    borderTopLeftRadius: 35,
-    borderTopRightRadius: 35,
-    alignItems: "center"
+    width: "100%",
+    paddingBottom: 10,
+    height: CARD_HEIGHT + 110,
+    alignItems: "center",
   },
   bottomCollapsibleHandle: {
-    position: "relative",
-    top: 10,
-    height: 5,
+    marginTop: 10,
+    height: 7,
     backgroundColor: "#888888",
     width: 50,
-    borderRadius: 2.5
+    borderRadius: 2.5,
   },
   filterButtonImage: {
-    position: "absolute",
-    bottom: CARD_HEIGHT + 80,
-    right: width / 2 - 40,
-    alignSelf: "flex-end",
+    marginBottom: 10,
     width: 80,
-    height: 40
+    height: 40,
   },
   myLocationButtonImage: {
-    position: "absolute",
-    bottom: CARD_HEIGHT + 80,
-    right: 15,
-    alignSelf: "flex-end",
     width: 40,
-    height: 40
+    height: 40,
+    marginBottom: 10,
+    marginRight: 10,
   },
   redoSearchButtonText: {
     color: "black",
     fontSize: 12,
-    fontFamily: "Roboto-Medium"
+    fontFamily: "Roboto-Medium",
   },
   redoSearchButton: {
     position: "absolute",
@@ -499,7 +582,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     justifyContent: "center",
     paddingHorizontal: 20,
-    borderRadius: 15
+    borderRadius: 15,
   },
   ratingContainer: {
     justifyContent: "center",
@@ -510,15 +593,15 @@ const styles = StyleSheet.create({
     margin: 10,
     width: CARD_WIDTH * 0.25,
     borderRadius: CARD_HEIGHT * 0.08,
-    marginTop: 15
+    marginTop: 15,
   },
   ratingText: {
     fontFamily: "Roboto-Medium",
     color: "white",
-    fontSize: 18
+    fontSize: 18,
   },
   markerWrap: {
     alignItems: "center",
-    justifyContent: "center"
-  }
+    justifyContent: "center",
+  },
 });

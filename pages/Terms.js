@@ -28,9 +28,9 @@ const Terms = ({ navigation }) => {
     );
   }
 
-  function setAll(){
+  function setAll() {
     setLocation(!location);
-    setNotification(!location)
+    setNotification(!location);
   }
   return (
     <View style={styles.container}>
@@ -43,7 +43,9 @@ const Terms = ({ navigation }) => {
           Your <Text style={{ color: "#FF4D12" }}>V</Text> life will begin.
         </Text>
       </View>
-      <View style={{ margin: 15, flex: 3, width: "100%", paddingHorizontal: 15  }}>
+      <View
+        style={{ margin: 15, flex: 3, width: "100%", paddingHorizontal: 15 }}
+      >
         <View style={styles.term}>
           <Text
             style={{
@@ -54,7 +56,7 @@ const Terms = ({ navigation }) => {
           >
             Agree All
           </Text>
-          <TouchableWithoutFeedback onPress={()=>setAll()}>
+          <TouchableWithoutFeedback onPress={() => setAll()}>
             {checked(location && notification)}
           </TouchableWithoutFeedback>
         </View>
@@ -78,7 +80,7 @@ const Terms = ({ navigation }) => {
             {checked(location)}
           </TouchableWithoutFeedback>
         </View>
-        
+
         <View style={[styles.term, { marginTop: 20 }]}>
           <Text
             style={{
@@ -99,8 +101,14 @@ const Terms = ({ navigation }) => {
           </TouchableWithoutFeedback>
         </View>
       </View>
-      
-      <TouchableWithoutFeedback onPress={() => location? navigation.navigate("Signup"): null}>
+
+      <TouchableWithoutFeedback
+        onPress={() =>
+          location
+            ? navigation.navigate("Signup", { notification: notification })
+            : null
+        }
+      >
         <View
           style={[
             styles.continueButton,
