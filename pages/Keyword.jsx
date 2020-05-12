@@ -2,12 +2,12 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 
 const Keyword = props => {
-  const { keywords } = props;
+  const { keywords, vertical } = props;
   return (
     <React.Fragment>
-      <View style={styles.restaurantKeywordContainer}>
+      <View style={{flexDirection: vertical? 'column': "row", marginBottom: 10, alignItems: 'flex-end'}}>
         {keywords.map((item, key) => (
-          <View key={key} style={styles.restaurantKeyword}>
+          <View key={key} style={[styles.restaurantKeyword, {marginBottom: 5}]}>
             <Text key={key} style={styles.restaurantKeywordText}>
               {" "}
               {item}{" "}
@@ -24,10 +24,6 @@ const styles = StyleSheet.create({
   restaurantKeywordText: {
     fontSize: 12,
     fontFamily: "Roboto-Medium"
-  },
-  restaurantKeywordContainer: {
-    flexDirection: "row",
-    marginBottom: 10
   },
   restaurantKeyword: {
     backgroundColor: "#E1E1E1",

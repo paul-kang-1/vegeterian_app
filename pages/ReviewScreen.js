@@ -9,7 +9,8 @@ import {
   ScrollView,
   ToastAndroid,
   Platform,
-  AlertIOS
+  AlertIOS,
+  Keyboard,
 } from "react-native";
 import Constants from "expo-constants";
 import StarRating from "react-native-star-rating";
@@ -51,14 +52,14 @@ const ReviewScreen = ({ navigation, route }) => {
     let result = [];
     for (let item of images) {
       await uploadImage(item.uri, item.name)
-        .then(snapshot => {
+        .then((snapshot) => {
           return snapshot.ref.getDownloadURL();
         })
-        .then(downloadURL => {
+        .then((downloadURL) => {
           console.log(`download available at ${downloadURL}`);
           result.push(downloadURL);
         })
-        .catch(err => {
+        .catch((err) => {
           console.error(err);
         });
     }
@@ -71,9 +72,9 @@ const ReviewScreen = ({ navigation, route }) => {
       .collection("users")
       .doc(uid)
       .update({
-        reviews: firebase.firestore.FieldValue.arrayUnion(ref.id)
+        reviews: firebase.firestore.FieldValue.arrayUnion(ref.id),
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
       });
   }
@@ -87,18 +88,15 @@ const ReviewScreen = ({ navigation, route }) => {
         userID: uid,
         likes: 0,
         time: firebase.firestore.FieldValue.serverTimestamp(),
-        restaurant: restaurantName
+        restaurant: restaurantName,
       })
-      .catch(err => {
+      .catch((err) => {
         console.error(err);
       });
   }
 
   async function addReview(urlList) {
-    const reviewRef = firebase
-      .firestore()
-      .collection("reviews")
-      .doc();
+    const reviewRef = firebase.firestore().collection("reviews").doc();
     await addReviewForUserDoc(reviewRef, uid);
     await addReviewForReviewDoc(reviewRef, urlList, uid);
     return;
@@ -110,9 +108,9 @@ const ReviewScreen = ({ navigation, route }) => {
     else {
       navigation.goBack();
       getImageUrlList()
-        .then(urlList => addReview(urlList))
+        .then((urlList) => addReview(urlList))
         .then(() => notifyMessage("Review saved! 🥰"))
-        .catch(err => {
+        .catch((err) => {
           console.error(err);
         });
     }
@@ -138,62 +136,70 @@ const ReviewScreen = ({ navigation, route }) => {
           <Text style={styles.cancelText}>Cancel</Text>
         </TouchableWithoutFeedback>
       </View>
-      <View style={styles.sectionCard}>
-        <Text style={styles.restaurantTitle}>{restaurantName}</Text>
-        <View style={{ paddingHorizontal: 40, paddingVertical: 10 }}>
-          <StarRating
-            disabled={false}
-            maxStars={5}
-            rating={rating}
-            selectedStar={rating => setRating(rating)}
-            fullStarColor={"#FF4D12"}
-            halfStarEnabled={true}
-          />
-        </View>
-        <Text style={styles.ratingText}>
-          Touch the Stars to Rate Your Experience!
-        </Text>
-        <TextInput
-          style={styles.reviewTextInput}
-          onChangeText={text => setReview(text)}
-          multiline={true}
-          textAlignVertical="top"
-          placeholder={"Type your review here!"}
-          maxLength={10000}
-        ></TextInput>
-        <Text style={styles.letterCount}>{review.length}/10000 Characters</Text>
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <TouchableWithoutFeedback
-            onPress={() =>
-              navigation.navigate("ImageBrowser", {
-                imgCallBack: imgCallBack
-              })
-            }
-          >
-            <Image
-              source={require("../assets/icons/button_addImage.png")}
-              style={styles.buttonImage}
-              resizeMode="contain"
+      <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+        <View style={styles.sectionCard}>
+          <Text style={styles.restaurantTitle}>{restaurantName}</Text>
+          <View style={{ paddingHorizontal: 40, paddingVertical: 10 }}>
+            <StarRating
+              disabled={false}
+              maxStars={5}
+              rating={rating}
+              selectedStar={(rating) => setRating(rating)}
+              fullStarColor={"#FF4D12"}
+              halfStarEnabled={true}
             />
-          </TouchableWithoutFeedback>
-          <TouchableWithoutFeedback onPress={() => onSaveButtonPress()}>
-            <Image
-              source={require("../assets/icons/button_saveReview.png")}
-              style={styles.buttonImage}
-              resizeMode="contain"
-            />
-          </TouchableWithoutFeedback>
-        </View>
-        {images.length ? (
-          <View>
-            <ScrollView horizontal={true}>
-              {images.map((item, i) => renderImage(item, i))}
-            </ScrollView>
           </View>
-        ) : (
-          <View></View>
-        )}
-      </View>
+          <Text style={styles.ratingText}>
+            Touch the Stars to Rate Your Experience!
+          </Text>
+          <TextInput
+            style={styles.reviewTextInput}
+            onChangeText={(text) => setReview(text)}
+            multiline={true}
+            textAlignVertical="top"
+            placeholder={"Type your review here!"}
+            maxLength={10000}
+            returnKeyType="done"
+          ></TextInput>
+
+          <Text style={styles.letterCount}>
+            {review.length}/10000 Characters
+          </Text>
+          <View
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
+          >
+            <TouchableWithoutFeedback
+              onPress={() =>
+                navigation.navigate("ImageBrowser", {
+                  imgCallBack: imgCallBack,
+                })
+              }
+            >
+              <Image
+                source={require("../assets/icons/button_addImage.png")}
+                style={styles.buttonImage}
+                resizeMode="contain"
+              />
+            </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback onPress={() => onSaveButtonPress()}>
+              <Image
+                source={require("../assets/icons/button_saveReview.png")}
+                style={styles.buttonImage}
+                resizeMode="contain"
+              />
+            </TouchableWithoutFeedback>
+          </View>
+          {images.length ? (
+            <View>
+              <ScrollView horizontal={true}>
+                {images.map((item, i) => renderImage(item, i))}
+              </ScrollView>
+            </View>
+          ) : (
+            <View></View>
+          )}
+        </View>
+      </TouchableWithoutFeedback>
     </View>
   );
 };
@@ -207,21 +213,21 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: Constants.statusBarHeight,
     padding: 15,
-    backgroundColor: "white"
+    backgroundColor: "white",
   },
   sectionTitle: {
     width: "100%",
     flexDirection: "row",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
   },
   sectionTitleText: {
     fontFamily: "Roboto-Bold",
     fontSize: 20,
-    color: "#FF4D12"
+    color: "#FF4D12",
   },
   cancelText: {
     fontFamily: "Roboto-Light",
-    fontSize: 20
+    fontSize: 20,
   },
   sectionCard: {
     backgroundColor: "white",
@@ -231,17 +237,17 @@ const styles = StyleSheet.create({
     borderWidth: 1.2,
     marginTop: 10,
     borderRadius: 15,
-    padding: 15
+    padding: 15,
   },
   restaurantTitle: {
     fontFamily: "Roboto-Medium",
-    fontSize: 30
+    fontSize: 30,
   },
   ratingText: {
     alignSelf: "center",
     color: "#949191",
     fontFamily: "Roboto-Light",
-    paddingBottom: 10
+    paddingBottom: 10,
   },
   reviewTextInput: {
     flex: 1,
@@ -252,18 +258,18 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 15,
     fontFamily: "Roboto-Regular",
-    fontSize: 15
+    fontSize: 18,
   },
   buttonImage: {
     width: 75,
     height: 75,
     marginRight: 10,
     alignSelf: "center",
-    marginTop: 10
+    marginTop: 10,
   },
   letterCount: {
     alignSelf: "center",
     fontFamily: "Roboto-Light",
-    color: "#949191"
-  }
+    color: "#949191",
+  },
 });

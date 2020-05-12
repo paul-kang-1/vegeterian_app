@@ -8,6 +8,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import firebase from "firebase";
 import * as Google from "expo-google-app-auth";
@@ -199,10 +200,11 @@ const LoadingScreen = ({ navigation }) => {
           resizeMode="contain"
         />
       </View>
-      <KeyboardAvoidingView
+      <TouchableWithoutFeedback
         style={{ flex: 1, alignSelf: "center", width: "100%" }}
-        behavior="padding"
-        enabled
+        onPress={()=>Keyboard.dismiss()}
+        // behavior="padding"
+        // enabled
       >
         <View>
           <TextInput
@@ -304,7 +306,7 @@ const LoadingScreen = ({ navigation }) => {
             </TouchableWithoutFeedback>
           </View>
         </View>
-      </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
     </View>
   );
 };

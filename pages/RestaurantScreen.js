@@ -11,7 +11,7 @@ import {
   Linking,
   ToastAndroid,
   Platform,
-  AlertIOS
+  AlertIOS,
 } from "react-native";
 import MapView from "react-native-maps";
 import BGCarousel, { DEVICE_WIDTH } from "./BGCarousel";
@@ -27,27 +27,24 @@ const RestaurantScreen = ({ navigation, route }) => {
   const [isCollapsed, setCollapsed] = useState(true);
   const { id, ref } = route.params;
   const userUid = firebase.auth().currentUser.uid;
-  const userDocRef = firebase
-    .firestore()
-    .collection("users")
-    .doc(userUid);
+  const userDocRef = firebase.firestore().collection("users").doc(userUid);
   function fetchAdditionalInfo(id) {
     var docRef = ref.doc(id);
     docRef
       .get()
-      .then(function(doc) {
+      .then(function (doc) {
         var result = doc.data().d;
         result.coordinates = doc.data().l;
         return result;
       })
-      .then(result => {
+      .then((result) => {
         return addReviewToResult(result);
       })
-      .then(data => {
+      .then((data) => {
         setDataSource(data);
         fetchFavorite(data.name);
       })
-      .catch(e => console.error(e));
+      .catch((e) => console.error(e));
   }
 
   async function addReviewToResult(result) {
@@ -57,8 +54,8 @@ const RestaurantScreen = ({ navigation, route }) => {
       .collection("reviews")
       .where("restaurant", "==", result.name)
       .get()
-      .then(function(querySnapshot) {
-        querySnapshot.forEach(function(doc) {
+      .then(function (querySnapshot) {
+        querySnapshot.forEach(function (doc) {
           // doc.data() is never undefined for query doc snapshots
           reviews.push(doc.data());
         });
@@ -94,7 +91,7 @@ const RestaurantScreen = ({ navigation, route }) => {
               borderBottomWidth: 0.5,
               borderColor: "#C4C4C4",
               padding: 10,
-              flexDirection: "row"
+              flexDirection: "row",
             }}
           >
             <Text style={styles.reviewRatingText}>
@@ -110,10 +107,10 @@ const RestaurantScreen = ({ navigation, route }) => {
   async function fetchFavorite(name) {
     userDocRef
       .get()
-      .then(doc => {
+      .then((doc) => {
         return doc.data().favorites;
       })
-      .then(favorites => setFavorite(favorites.includes(name)));
+      .then((favorites) => setFavorite(favorites.includes(name)));
   }
 
   async function changeFavorite(newFavorite) {
@@ -121,9 +118,9 @@ const RestaurantScreen = ({ navigation, route }) => {
       .update({
         favorites: newFavorite
           ? firebase.firestore.FieldValue.arrayUnion(dataSource.name)
-          : firebase.firestore.FieldValue.arrayRemove(dataSource.name)
+          : firebase.firestore.FieldValue.arrayRemove(dataSource.name),
       })
-      .then(result => {
+      .then((result) => {
         const msg = `✔️ Successfully ${
           newFavorite ? "added to" : "removed from"
         } your favorites!`;
@@ -189,7 +186,7 @@ const RestaurantScreen = ({ navigation, route }) => {
               <View
                 style={{
                   flexDirection: "row",
-                  justifyContent: "space-between"
+                  justifyContent: "space-between",
                 }}
               >
                 <View>
@@ -205,23 +202,31 @@ const RestaurantScreen = ({ navigation, route }) => {
               <View style={styles.lowerContainer}>
                 <Keyword keywords={dataSource.type} />
                 <MapView
-                onPress={()=>navigation.navigate("Map")}
+                  onPress={() =>
+                    navigation.navigate("Map", {
+                      latitude: dataSource.coordinates["U"],
+                      longitude: dataSource.coordinates["k"],
+                      latitudeDelta: 0.0052,
+                      longitudeDelta: 0.00521,
+                      name: dataSource.name,
+                    })
+                  }
                   style={{
                     height: 130,
                     width: "100%",
-                    marginBottom: 10
+                    marginBottom: 10,
                   }}
                   initialRegion={{
                     latitude: dataSource.coordinates["U"],
                     longitude: dataSource.coordinates["k"],
                     latitudeDelta: 0.0022,
-                    longitudeDelta: 0.0221
+                    longitudeDelta: 0.0221,
                   }}
                 >
                   <MapView.Marker
                     coordinate={{
                       latitude: dataSource.coordinates["U"],
-                      longitude: dataSource.coordinates["k"]
+                      longitude: dataSource.coordinates["k"],
                     }}
                     title={dataSource.name}
                   />
@@ -230,7 +235,7 @@ const RestaurantScreen = ({ navigation, route }) => {
                   style={{
                     fontFamily: "Roboto-Light",
                     fontSize: 15,
-                    alignSelf: "center"
+                    alignSelf: "center",
                   }}
                 >
                   {dataSource.address.address_full}
@@ -238,7 +243,7 @@ const RestaurantScreen = ({ navigation, route }) => {
                 <View
                   style={{
                     flexDirection: "row",
-                    justifyContent: "space-between"
+                    justifyContent: "space-between",
                   }}
                 >
                   <TouchableWithoutFeedback
@@ -278,7 +283,7 @@ const RestaurantScreen = ({ navigation, route }) => {
                 </Text>
                 <View
                   style={{
-                    marginVertical: 10
+                    marginVertical: 10,
                   }}
                 >
                   {dataSource ? renderReviews() : null}
@@ -288,7 +293,9 @@ const RestaurantScreen = ({ navigation, route }) => {
           </View>
         ) : (
           <View style={styles.contents}>
-            <View style={{ flex: 2, justifyContent: "center", paddingTop: 150 }}>
+            <View
+              style={{ flex: 2, justifyContent: "center", paddingTop: 150 }}
+            >
               <ActivityIndicator size="large" />
             </View>
             <View style={{ flex: 7 }}></View>
@@ -304,18 +311,19 @@ const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
     width: DEVICE_WIDTH,
-    marginTop: Constants.statusBarHeight,
-    backgroundColor: "white"
+    backgroundColor: "white",
+    borderTopColor: "#FF4D12",
+    borderTopWidth: Constants.statusBarHeight,
   },
   contents: {
     width: DEVICE_WIDTH,
-    flex: 1
+    flex: 1,
   },
   restaurantTitleText: {
     fontSize: 35,
     fontFamily: "Roboto-Light",
     paddingTop: 10,
-    marginLeft: 12
+    marginLeft: 12,
   },
   restaurantRatingText: {
     alignSelf: "center",
@@ -323,14 +331,14 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 40,
     fontFamily: "Roboto-Light",
-    color: "#FF4D12"
+    color: "#FF4D12",
   },
   statusIcon: { height: 15, width: 20, marginLeft: 10 },
   statusContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginTop: 5,
-    marginLeft: 5
+    marginLeft: 5,
   },
   callButton: {
     width: "48.5%",
@@ -342,7 +350,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingVertical: 15,
-    borderRadius: 10
+    borderRadius: 10,
   },
   lowerContainer: {
     borderTopColor: "#C4C4C4",
@@ -350,38 +358,38 @@ const styles = StyleSheet.create({
     margin: 10,
     marginTop: 10,
     paddingTop: 10,
-    paddingHorizontal: 5
+    paddingHorizontal: 5,
   },
   sectionTitleText: { fontFamily: "OpenSans-Bold", fontSize: 20 },
   reviewContainer: {
     borderWidth: 1,
     width: "100%",
     marginTop: 10,
-    borderColor: "#FF4D12"
+    borderColor: "#FF4D12",
   },
   reviewText: {
     fontFamily: "Roboto-Light",
     fontSize: 15,
     flex: 1,
-    flexWrap: "wrap"
+    flexWrap: "wrap",
   },
   starContainer: {
     position: "absolute",
     left: 0,
     bottom: 0,
     padding: 10,
-    paddingBottom: 5
+    paddingBottom: 5,
   },
   reviewRatingText: {
     fontFamily: "OpenSans-Bold",
     fontSize: 30,
     color: "#FF4D12",
-    marginRight: 10
+    marginRight: 10,
   },
   reviewButtonContainer: {
     position: "absolute",
     right: 0,
     bottom: 0,
-    padding: 10
-  }
+    padding: 10,
+  },
 });

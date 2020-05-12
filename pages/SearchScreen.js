@@ -21,6 +21,7 @@ import MapView from "react-native-maps";
 import Constants from "expo-constants";
 import * as Location from "expo-location";
 import * as Permissions from "expo-permissions";
+import Keyword from "./Keyword";
 
 const { width, height } = Dimensions.get("window");
 const CARD_HEIGHT = height / 3.5;
@@ -86,7 +87,7 @@ const SearchScreen = ({ navigation }) => {
           duration: 200,
         }).start()
       : Animated.timing(positionRef.current, {
-          toValue: -CARD_HEIGHT-20,
+          toValue: -CARD_HEIGHT - 20,
           duration: 200,
         }).start(() => {
           console.log(position.y);
@@ -148,10 +149,10 @@ const SearchScreen = ({ navigation }) => {
     });
     query.get().then((value) => {
       if (value.docs.length === 0) {
-        // Alert.alert(
-        //   "No restaurants around you 😞",
-        //   "Try searching on a different location!"
-        // );
+        Alert.alert(
+          "No restaurants around you 😞",
+          "Try searching on a different location!"
+        );
         setNoRestaurants(true);
       }
       // All GeoDocument returned by GeoQuery, like the GeoDocument added above
@@ -260,9 +261,11 @@ const SearchScreen = ({ navigation }) => {
       {myLocation ? (
         <React.Fragment>
           <MapView
+            mapPadding={{ bottom: CARD_HEIGHT * 0.3 }}
             style={{
               flex: 1,
               width: "100%",
+              marginBottom: 30,
             }}
             region={{
               latitude: myLocation.latitude,
@@ -271,7 +274,6 @@ const SearchScreen = ({ navigation }) => {
               longitudeDelta: 0.0221,
             }}
             rotateEnabled={false}
-            mapPadding={{ top: 0, left: 0, right: 0, bottom: CARD_HEIGHT + 50 }}
             onRegionChangeComplete={({ latitude, longitude }) =>
               (newLocation = { latitude: latitude, longitude: longitude })
             }
@@ -332,7 +334,7 @@ const SearchScreen = ({ navigation }) => {
               setSearch(text);
             }}
             placeholder="Search.."
-            placeholderTextColor="white"
+            placeholderTextColor="gray"
           ></TextInput>
           <TouchableWithoutFeedback onPress={() => redoSearch()}>
             <View style={[styles.redoSearchButton, styles.shadow]}>
@@ -349,15 +351,18 @@ const SearchScreen = ({ navigation }) => {
           </View>
         </React.Fragment>
       )}
-      <Animated.View style={[{ bottom: positionRef.current.y }, styles.bottomCollapsible]}>
+      <Animated.View
+        style={[{ bottom: positionRef.current.y }, styles.bottomCollapsible]}
+      >
         <View
           style={{
             flexDirection: "row",
             justifyContent: "space-between",
             width: "100%",
+            alignItems: 'flex-end'
           }}
         >
-          <View style={{ width: 40, height: 40 }}></View>
+          <View style={{ width: 50, height: 50, marginBottom:10, marginRight:10 }}></View>
           <TouchableWithoutFeedback onPress={() => console.log("filterButton")}>
             <Image
               source={require("../assets/icons/button_filter.png")}
@@ -375,19 +380,19 @@ const SearchScreen = ({ navigation }) => {
         <View
           style={{
             width: "100%",
-            height: CARD_HEIGHT + 70,
+            height: CARD_HEIGHT * 1.3,
             backgroundColor: "rgba(255,255,255,0.9)",
-            borderTopLeftRadius: 35,
-            borderTopRightRadius: 35,
+            borderTopLeftRadius: CARD_HEIGHT * 0.2,
+            borderTopRightRadius: CARD_HEIGHT * 0.2,
           }}
         >
           <View
             style={{
               width: "100%",
               alignItems: "center",
-              paddingBottom: CARD_HEIGHT*0.1,
-              borderWidth: 1,
-              borderColor: 'rgba(255,255,255,0)'
+              paddingBottom: CARD_HEIGHT * 0.1,
+              borderColor: "rgba(255,255,255,0)",
+              zIndex: 999,
             }}
             {...panResponder.panHandlers}
           >
@@ -401,8 +406,8 @@ const SearchScreen = ({ navigation }) => {
               decelerationRate={0.9}
               snapToInterval={CARD_WIDTH + 20} //your element width
               snapToAlignment={"center"}
-              centerContent={true}
-              snapToStart={false}
+              centerContent={false}
+              snapToStart={true}
               onScroll={Animated.event(
                 [
                   {
@@ -415,7 +420,13 @@ const SearchScreen = ({ navigation }) => {
                 ],
                 { useNativeDriver: true }
               )}
-              style={styles.scrollView}
+              style={[
+                styles.scrollView,
+                {
+                  paddingLeft: Platform.OS === "ios" ? 0 : width / 6 - 10,
+                  paddingRight: Platform.OS === "ios" ? width / 6 - 10 : 0,
+                },
+              ]}
               contentContainerStyle={styles.endPadding}
               ref={scrollRef}
             >
@@ -432,6 +443,19 @@ const SearchScreen = ({ navigation }) => {
                         key={index}
                       >
                         <View style={[styles.card, styles.shadow]}>
+                          <View
+                            style={{
+                              position: "absolute",
+                              zIndex: 999,
+                              top: 5,
+                              right: 0,
+                            }}
+                          >
+                            <Keyword
+                              keywords={marker.data().type}
+                              vertical={true}
+                            />
+                          </View>
                           <Image
                             source={{
                               uri: marker.data().images[
@@ -492,7 +516,8 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: Constants.statusBarHeight,
+    borderTopWidth: Constants.statusBarHeight,
+    borderTopColor: "#FF4D12",
   },
   scrollView: {
     position: "absolute",
@@ -500,7 +525,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     paddingVertical: 10,
-    paddingLeft: width / 6 - 10,
   },
   endPadding: {
     paddingRight: width - CARD_WIDTH,
@@ -510,7 +534,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     height: CARD_HEIGHT,
     width: CARD_WIDTH,
-    overflow: "hidden",
+    overflow: "visible",
     borderRadius: 15,
     marginVertical: 15,
   },
@@ -519,6 +543,8 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     alignSelf: "center",
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
   },
   textContent: {
     flex: 1,
@@ -536,7 +562,7 @@ const styles = StyleSheet.create({
   search: {
     position: "absolute",
     top: 10,
-    backgroundColor: "#C4C4C4",
+    backgroundColor: "white",
     height: 40,
     width: width * 0.8,
     borderRadius: 20,
@@ -548,9 +574,9 @@ const styles = StyleSheet.create({
   bottomCollapsible: {
     position: "absolute",
     width: "100%",
-    paddingBottom: 10,
-    height: CARD_HEIGHT + 110,
-    alignItems: "center",
+    height: CARD_HEIGHT * 1.55,
+    alignItems: "flex-end",
+    justifyContent: "space-between",
   },
   bottomCollapsibleHandle: {
     marginTop: 10,
@@ -565,13 +591,13 @@ const styles = StyleSheet.create({
     height: 40,
   },
   myLocationButtonImage: {
-    width: 40,
-    height: 40,
+    width: 50,
+    height: 50,
     marginBottom: 10,
     marginRight: 10,
   },
   redoSearchButtonText: {
-    color: "black",
+    color: "gray",
     fontSize: 12,
     fontFamily: "Roboto-Medium",
   },

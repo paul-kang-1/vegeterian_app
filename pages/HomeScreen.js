@@ -8,7 +8,8 @@ import {
   Image,
   BackHandler,
   ToastAndroid,
-  Button
+  Button,
+  Dimensions,
 } from "react-native";
 import Constants from "expo-constants";
 import firebase, { firestore } from "firebase";
@@ -19,15 +20,17 @@ import Keyword from "./Keyword";
  * @component
  * @param {Object} navigation prop passed from navigator
  */
+const screenHeight = Dimensions.get("window").height;
+
 const HomeScreen = ({ navigation }) => {
   const [dataSource, setDataSource] = useState([]);
   const [backClickCount, setBackClickCount] = useState(0);
   const [loading, setLoading] = useState(true); // for data
   const ref = firestore().collection("test");
   const makeRemoteRequest = () => {
-    return ref.onSnapshot(querySnapshot => {
+    return ref.onSnapshot((querySnapshot) => {
       const restaurants = [];
-      querySnapshot.forEach(doc => {
+      querySnapshot.forEach((doc) => {
         const { name, rating, type, thumbnail, address } = doc.data().d;
         restaurants.push({
           id: doc.id,
@@ -35,7 +38,7 @@ const HomeScreen = ({ navigation }) => {
           rating,
           type,
           thumbnail,
-          address
+          address,
         });
       });
       setDataSource(restaurants);
@@ -51,7 +54,7 @@ const HomeScreen = ({ navigation }) => {
         onPress={() => {
           navigation.navigate("Restaurant", {
             id: item.id,
-            ref: ref
+            ref: ref,
           });
         }}
       >
@@ -64,7 +67,8 @@ const HomeScreen = ({ navigation }) => {
             style={{
               flexDirection: "row",
               justifyContent: "space-between",
-              marginLeft: 10
+              alignItems: "center",
+              marginLeft: 10,
             }}
           >
             <View>
@@ -77,7 +81,7 @@ const HomeScreen = ({ navigation }) => {
                   width: 25,
                   height: 25,
                   marginTop: 19,
-                  marginRight: 10
+                  marginRight: 10,
                 }}
               >
                 <Image
@@ -110,8 +114,8 @@ const HomeScreen = ({ navigation }) => {
     if (navigation.isFocused()) {
       ToastAndroid.show("Press Back again to Exit", ToastAndroid.SHORT);
       setBackClickCount(1);
-      console.log(backClickCount)
-      setTimeout(function() {
+      console.log(backClickCount);
+      setTimeout(function () {
         setBackClickCount(0);
       }, 1000);
     } else {
@@ -121,17 +125,17 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const handleBackButton = () => {
-    console.log(`backclick: ${backClickCount}`)
+    console.log(`backclick: ${backClickCount}`);
     backClickCount == 1 ? BackHandler.exitApp() : backButtonEffect();
     return true;
   };
 
   onSignOut = () => {
     firebase.auth().signOut();
-    navigation.navigate('Loading')
+    navigation.navigate("Loading");
   };
 
-  firebase.auth().onAuthStateChanged(user => {
+  firebase.auth().onAuthStateChanged((user) => {
     if (user === null) {
       navigation.navigate("Loading");
     }
@@ -146,7 +150,11 @@ const HomeScreen = ({ navigation }) => {
           </Text>
         </View>
         <View style={[styles.vsPick, styles.shadow]}>
-          <Button onPress={() => onSignOut()} title={"Merge Account"} />
+          <Image
+            source={require("../assets/images/vspick_sample.png")}
+            resizemode="contain"
+            style={{ width: "100%", height: "100%" }}
+          />
         </View>
         <View style={styles.titleContainer2}>
           <Text style={styles.pageTitle}>
@@ -158,11 +166,11 @@ const HomeScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={{ backgroundColor: "white" }}>
+    <View style={styles.screenContainer}>
       <FlatList
         data={dataSource}
         renderItem={renderItem}
-        keyExtractor={item => item.name}
+        keyExtractor={(item) => item.name}
         // initialNumToRender={2}
         // maxToRenderPerBatch={2}
         scrollEnabled={true}
@@ -177,13 +185,13 @@ const HomeScreen = ({ navigation }) => {
 };
 export default HomeScreen;
 
-const elevationShadowStyle = elevation => {
+const elevationShadowStyle = (elevation) => {
   return {
     elevation,
     shadowColor: "black",
     shadowOffset: { width: 0, height: 0.5 * elevation },
     shadowOpacity: 0.3,
-    shadowRadius: 0.8 * elevation
+    shadowRadius: 0.8 * elevation,
   };
 };
 
@@ -193,18 +201,18 @@ const styles = StyleSheet.create({
     height: 330,
     marginHorizontal: 15,
     paddingHorizontal: 10,
-    paddingBottom: 10,
+    paddingVertical: 10,
     backgroundColor: "white",
     justifyContent: "center",
-    borderRadius: 8
+    borderRadius: 8,
   },
   titleContainer: {
-    height: 100,
+    height: 50,
     flexDirection: "row",
     width: "100%",
     justifyContent: "space-between",
     paddingLeft: 20,
-    marginTop: 10
+    marginTop: 10,
   },
   titleContainer2: {
     flex: 0,
@@ -212,19 +220,21 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingTop: 20,
     justifyContent: "space-between",
-    paddingLeft: 20
+    paddingLeft: 20,
   },
   pageTitle: {
     fontFamily: "Roboto-Light",
     fontSize: 35,
     alignSelf: "flex-end",
-    marginBottom: 5
+    marginBottom: 5,
   },
   thumbnail: {
     //flex: 1,
     width: null,
     height: 170,
-    resizeMode: "cover"
+    resizeMode: "cover",
+    borderTopRightRadius: 8,
+    borderTopLeftRadius: 8,
   },
   imageCard: {
     flex: 1,
@@ -233,32 +243,32 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     backgroundColor: "white",
     borderRadius: 8,
-    overflow: "hidden"
+    overflow: "visible",
   },
   screenContainer: {
-    flex: 1,
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
     backgroundColor: "white",
-    marginTop: Constants.statusBarHeight
+    borderTopColor: "#FF4D12",
+    borderTopWidth: Constants.statusBarHeight,
+    paddingTop: 10,
   },
   restaurantRatingText: {
     fontSize: 20,
     fontFamily: "Roboto-Medium",
-    color: "#FFF"
+    color: "#FFF",
   },
   restaurantTitleText: {
     fontSize: 20,
     fontFamily: "Roboto-Medium",
     paddingTop: 5,
-    paddingBottom: 2
+    paddingBottom: 2,
   },
   restaurantRating: {
     backgroundColor: "#FF4D12",
     borderRadius: 20,
     paddingHorizontal: 15,
     marginRight: 10,
-    marginVertical: 15
-  }
+    marginVertical: 15,
+    height: 30,
+    justifyContent: "center",
+  },
 });
